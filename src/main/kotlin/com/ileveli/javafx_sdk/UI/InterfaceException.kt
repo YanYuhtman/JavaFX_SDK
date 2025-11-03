@@ -2,7 +2,7 @@ package com.ileveli.javafx_sdk.UI
 
 import java.lang.Exception
 
-class UI_Excpetion : Exception {
+class InterfaceException : Exception {
     constructor() : super()
     constructor(message: String?) : super(message)
     constructor(message: String?, cause: Throwable?) : super(message, cause)

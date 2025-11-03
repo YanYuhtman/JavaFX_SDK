@@ -1,7 +1,10 @@
 package com.ileveli.javafx_sdk.UI
 
+import com.ileveli.javafx_sdk.UI.AbstractApplication.Companion.Logger
+import javafx.fxml.Initializable
 
-abstract class AbstractController<AppContext> : IAppContextProvider<AppContext>
+
+abstract class AbstractController<AppContext> : Initializable, IAppContextProvider<AppContext>
         where AppContext : AbstractApplication
 {
     private var _appContext:AppContext? = null
@@ -10,9 +13,10 @@ abstract class AbstractController<AppContext> : IAppContextProvider<AppContext>
 
     internal fun init(appContext: AppContext){
         _appContext = appContext
-        appContext.Logger.info { "Controller initialized"}
+        Logger.info { "Controller initialized"}
     }
-//    private val modelsMap = mutableMapOf<KClass<*>,AbstractModel<AppContext, AbstractController<AppContext>>>()
+
+    //    private val modelsMap = mutableMapOf<KClass<*>,AbstractModel<AppContext, AbstractController<AppContext>>>()
 //    fun attachModel(model: AbstractModel<AppContext, AbstractController<AppContext>>){
 //        modelsMap[model::class] = model
 //        model.attachController(this)

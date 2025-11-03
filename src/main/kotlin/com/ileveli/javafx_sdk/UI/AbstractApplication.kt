@@ -17,9 +17,6 @@ abstract class AbstractApplication : Application() {
              Logger.exit(1)
          }
     }
-
-    val Logger: KLogger
-        get() = AbstractApplication.Logger
 }
 
 

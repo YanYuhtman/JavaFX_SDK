@@ -63,11 +63,10 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
             if(forceDetachOld)
                 detachModel(model::class)
             else
-                throw UI_Excpetion("The model type ${model::class} already attached to the Scene ${this@AbstractScene::class}")
+                throw InterfaceException("The model type ${model::class} already attached to the Scene ${this@AbstractScene::class}")
         }
         modelCache[model::class] = model
         OnModelCached(model)
-
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -90,7 +89,6 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     fun getModel(clazz: KClass<out IModel>) : IModel?{
         return modelCache[clazz]
     }
-
  }
 
 
