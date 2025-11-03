@@ -1,6 +1,8 @@
 package com.ileveli.javafx_sdk.UI
 
-import com.ileveli.javafx_sdk.UI.AbstractApplication.Companion.Logger
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+
 
 enum class ModelState{
     DETACHED,
@@ -46,18 +48,18 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         _appContext = scene.appContext
         modelState = ModelState.SCENE_ATTACHED
 
-        Logger.info { "Scene ${scene::class} attached to the the model\n${this@AbstractSceneModel::class}" }
+        Logger.debug { "Scene ${scene::class} attached to the the model\n${this@AbstractSceneModel::class}" }
     }
 
     internal fun detachScene(){
-        Logger.info { "Scene ${scene::class} detaching from the the model\n${this@AbstractSceneModel::class}" }
+        Logger.debug { "Scene ${scene::class} detaching from the the model\n${this@AbstractSceneModel::class}" }
         _scene = null
         modelState = ModelState.SCENE_DETACHED
         _appContext = null
     }
 
     internal fun onModelStateChanged(){
-        Logger.info { "Model state changed to $modelState" }
+        Logger.debug { "Model state changed to $modelState" }
         OnModelStateChanged(modelState)
         when(modelState){
             ModelState.ATTACHED -> OnAttached()
@@ -103,11 +105,11 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
     internal fun attachController(controller:Controller){
         _controller = controller;
         modelState = ModelState.CONTROLLER_ATTACHED
-        Logger.info { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
+        Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
     }
 
     internal fun detachController(){
-        Logger.info { "Controller ${controller::class} detaching from the the model ${this@AbstractControllerModel::class}" }
+        Logger.debug { "Controller ${controller::class} detaching from the the model ${this@AbstractControllerModel::class}" }
         _controller = null
         modelState = ModelState.CONTROLLER_DETACHED
 

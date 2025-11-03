@@ -1,6 +1,7 @@
 package com.ileveli.javafx_sdk
 
 import com.ileveli.javafx_sdk.UI.AbstractApplication
+import com.ileveli.javafx_sdk.UI.Logger
 import javafx.application.Platform
 import javafx.stage.Stage
 import org.junit.jupiter.api.Test

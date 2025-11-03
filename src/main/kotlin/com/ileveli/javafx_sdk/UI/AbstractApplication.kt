@@ -4,13 +4,11 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Application
 
+val Logger: KLogger
+    get() = KotlinLogging.logger( Thread.currentThread().stackTrace[2].className )
+
 
 abstract class AbstractApplication : Application() {
-    companion object{
-        val Logger: KLogger by lazy{
-            KotlinLogging.logger{}
-        }
-    }
     init {
          Thread.setDefaultUncaughtExceptionHandler {
                  thread, exception ->  Logger.error(exception){"$thread Unhandled exception!" }
