@@ -112,12 +112,14 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
 
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun OnModelCached(model: IModel) {
         val m = (model as AbstractControllerModel<AppContext, AbstractScene<AppContext>, AbstractController<AppContext>>)
         m.attachScene(this)
         m.attachController(controller)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun OnModelUncached(model: IModel) {
         val m = (model as AbstractControllerModel<AppContext, AbstractScene<AppContext>, AbstractController<AppContext>>)
         m.detachScene()
