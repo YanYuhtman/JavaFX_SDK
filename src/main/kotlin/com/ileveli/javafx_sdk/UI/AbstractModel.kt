@@ -1,9 +1,9 @@
 package com.ileveli.javafx_sdk.UI
 
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-
+/**
+ * Model state attach detach component status
+ */
 enum class ModelState{
     DETACHED,
     ATTACHED,
@@ -13,9 +13,16 @@ enum class ModelState{
     CONTROLLER_DETACHED,
 }
 
+/**
+ * Model interface
+ */
 interface IModel{
 
 }
+
+/**
+ * Basic Scene model, without FXML support
+ */
 abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvider<AppContext>, ISceneProvider<AppContext, AbstractScene<AppContext>>
     where AppContext : AbstractApplication, Scene : AbstractScene<AppContext> {
 
@@ -40,6 +47,11 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         get() = _appContext?.let { return it } ?: throw InterfaceException("The application context is not attached!")
 
     internal var _scene:Scene? = null
+    /**
+     * @return The attached scene
+     * @throws InterfaceException in case attached component not available
+     * @see ModelState
+     */
     override val scene: AbstractScene<AppContext>
         get() = _scene?.let { return it } ?: throw InterfaceException("The scene is not attached!")
 
@@ -68,12 +80,35 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         }
     }
 
+    /**
+     * Called on model state changed
+     * @param state current model state
+     * @see ModelState
+     */
     open fun OnModelStateChanged(state: ModelState){}
+
+    /**
+     * Called when model finally attached. In this state all component references are available
+     */
     abstract fun OnAttached()
+
+    /**
+     * Called when model detached from all components
+     */
     abstract fun OnDetached()
 
 }
-
+/**
+ * Model attached to FXML controller
+ * @param AppContext Application context
+ * @see AbstractApplication
+ *
+ * @param Scene Attached scene
+ * @see AbstractScene
+ *
+ * @param Controller Attached controller
+ * @see AbstractController
+ */
 abstract class AbstractControllerModel<AppContext, Scene, Controller> : AbstractSceneModel<AppContext, Scene>()
         where AppContext : AbstractApplication,
               Scene : AbstractScene<AppContext>,
@@ -99,6 +134,12 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
 
 
     internal var _controller:Controller? = null
+
+    /**
+     * @return The attached controller
+     * @throws InterfaceException in case attached component not available
+     * @see ModelState
+     */
     val controller:Controller
         get() = _controller?.let { return it } ?: throw InterfaceException("The controller is not attached!")
 

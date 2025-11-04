@@ -7,7 +7,9 @@ import javafx.application.Application
 val Logger: KLogger
     get() = KotlinLogging.logger( Thread.currentThread().stackTrace[2].className )
 
-
+/**
+ * Basic Application abstraction
+ */
 abstract class AbstractApplication : Application() {
     init {
          Thread.setDefaultUncaughtExceptionHandler {

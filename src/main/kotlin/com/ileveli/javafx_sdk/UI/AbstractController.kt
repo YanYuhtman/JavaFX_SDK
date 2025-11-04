@@ -3,6 +3,9 @@ package com.ileveli.javafx_sdk.UI
 import javafx.fxml.Initializable
 
 
+/**
+ * Abstract Context aware controller
+ */
 abstract class AbstractController<AppContext> : Initializable, IAppContextProvider<AppContext>
         where AppContext : AbstractApplication
 {
