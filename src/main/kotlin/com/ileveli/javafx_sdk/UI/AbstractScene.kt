@@ -27,14 +27,16 @@ internal object SceneUtils{
         loaderDic.remove(fxmlResourcePath)
         return result
     }
-    internal fun MenuBarWrapper(parent: Parent, menuBar: MenuBar = MenuBar()) : Parent{
+    internal fun MenuBarWrapper(parent: Parent, menuBar: MenuBar? = null) : Parent{
         val pane = BorderPane().also { pane ->
             pane.id = id_root_pan
         }
-        menuBar.isUseSystemMenuBar = true
-        menuBar.id = id_menuBar
+        val _menuBar = menuBar ?: MenuBar().also {
+            it.isUseSystemMenuBar = true
+        }
+        _menuBar.id = id_menuBar
 
-        pane.top = menuBar
+        pane.top = _menuBar
         pane.bottom = parent
 
         return pane
