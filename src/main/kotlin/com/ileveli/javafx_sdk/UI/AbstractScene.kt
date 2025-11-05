@@ -5,11 +5,16 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
+import javafx.scene.control.MenuBar
+import javafx.scene.layout.BorderPane
 import java.security.InvalidParameterException
 import kotlin.io.path.Path
 import kotlin.io.path.extension
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
+
+const val id_root_pan = "ileveli_root_pane"
+const val id_menuBar = "ileveli_menuBar"
 
 internal object SceneUtils{
     private val loaderDic = mutableMapOf<String, FXMLLoader>()
@@ -20,11 +25,28 @@ internal object SceneUtils{
         loaderDic.remove(fxmlResourcePath)
         return result
     }
+    internal fun MenuBarWrapper(parent: Parent) : Parent{
+        val pane = BorderPane().also { pane ->
+            pane.id = id_root_pan
+        }
+        val menuBar = MenuBar().also { menuBar ->
+            menuBar.isUseSystemMenuBar = true
+            menuBar.id = id_menuBar
+        }
+        pane.top = menuBar
+        pane.bottom = parent
+
+        return pane
+    }
     internal fun <AppContext>LoadFXMl(appContext:AppContext ,fxmlResourcePath:String): Parent
             where AppContext : Application{
         val fxmlLoader = FXMLLoader(appContext.javaClass.getResource(verifyFXMLPath(fxmlResourcePath)))
         loaderDic[fxmlResourcePath] = fxmlLoader
         return fxmlLoader.load()
+    }
+    internal fun <AppContext>LoadWrappedFXMl(appContext:AppContext ,fxmlResourcePath:String): Parent
+        where AppContext : Application{
+           return MenuBarWrapper(LoadFXMl(appContext,fxmlResourcePath))
     }
     internal fun verifyFXMLPath(pathString: String):String{
         if(pathString.isBlank())
@@ -48,20 +70,38 @@ internal object SceneUtils{
 
 abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
         where AppContext : AbstractApplication {
-    internal val _appContext: AppContext
+    internal lateinit var _appContext: AppContext
     override val appContext: AppContext
         get() = _appContext
 
+    internal lateinit var _root: Parent
+    val rootParent: Parent
+        get() =  _root
+
+
+    internal lateinit var _menuBar: MenuBar
+    val menuBar: MenuBar
+        get() =  menuBar
+
+
+    private fun _initialize(){
+        _appContext = appContext
+        _root = this.lookup("#$id_root_pan") as Parent
+        _menuBar = this.lookup("#$id_menuBar") as MenuBar
+    }
     /**
+     * @constructor Construct scene with ready to use MenuBar [menuBar]
      * @param appContext Application class reference
      * @see javafx.scene.Scene for the rest params
      */
     constructor(appContext: AppContext, root: Parent, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
-            : super (root,-1.0,-1.0,depthBuffer,antialising){
+            : super ( SceneUtils.MenuBarWrapper(root),-1.0,-1.0,depthBuffer,antialising){
         this._appContext = appContext
+
     }
 
     /**
+     * @constructor Construct scene with ready to use MenuBar [menuBar]
      * @param appContext Application class reference
      * @see javafx.scene.Scene for the rest params
      */
@@ -112,37 +152,45 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
 
 /**
- * Context aware scene abstraction for FXML solution
+ * Context aware scene abstraction for FXML solution with ready to use Manu Bar
  * @param AppContext The reference to the Application class
  * @param Controller The FXML Controller that is defined in the fxml descriptor
+ * @see MenuBar
  */
 abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppContext>
         where AppContext : AbstractApplication, Controller : AbstractController<AppContext>{
-    protected var loader: FXMLLoader
+    protected lateinit var loader: FXMLLoader
 
     val controller:Controller
         get() = loader.getController<Controller>()
 
+    private fun _initialize(fxmlResourcePath: String){
+        this.loader = SceneUtils.DemandLoader(fxmlResourcePath)
+        val rootPane = this.lookup("#$id_root_pan") as Parent
+        val menuBar = this.lookup("#$id_menuBar") as MenuBar
+        controller.init(appContext,rootPane,menuBar)
+
+    }
     /**
+     * @constructor Constructs context aware scene by FXML with ready to use ManuBar [AbstractController.menuBar]
      * @param appContext Application class reference
      * @param fxmlResourcePath Subpath to the FXML file - **Relative to the toot of the Context classpath!**
      * @see javafx.scene.Scene for the rest params
      */
     constructor(appContext: AppContext, fxmlResourcePath: String, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
-            :super(appContext, SceneUtils.LoadFXMl(appContext,fxmlResourcePath),depthBuffer,antialising){
-        this.loader = SceneUtils.DemandLoader(fxmlResourcePath)
-        controller.init(appContext)
+            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath),depthBuffer,antialising){
+        _initialize(fxmlResourcePath)
     }
 
     /**
+     * @constructor Constructs context aware scene by FXML with ready to use ManuBar [AbstractController.menuBar]
      * @param appContext Application class reference
      * @param fxmlResourcePath Subpath to the FXML file - **Relative to the toot of the Context classpath!**
      * @see javafx.scene.Scene for the rest params
      */
     constructor(appContext: AppContext, fxmlResourcePath: String, width: Double, height:Double, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
-            :super(appContext, SceneUtils.LoadFXMl(appContext,fxmlResourcePath),width,height,depthBuffer,antialising){
-        this.loader = SceneUtils.DemandLoader(fxmlResourcePath)
-        controller.init(appContext)
+            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath),width,height,depthBuffer,antialising){
+        _initialize(fxmlResourcePath)
 
     }
 
@@ -159,6 +207,7 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
         m.detachScene()
         m.detachController()
     }
+
 }
 
 

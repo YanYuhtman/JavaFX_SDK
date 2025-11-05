@@ -1,6 +1,9 @@
 package com.ileveli.javafx_sdk.UI
 
 import javafx.fxml.Initializable
+import javafx.scene.Node
+import javafx.scene.Parent
+import javafx.scene.control.MenuBar
 
 
 /**
@@ -9,12 +12,22 @@ import javafx.fxml.Initializable
 abstract class AbstractController<AppContext> : Initializable, IAppContextProvider<AppContext>
         where AppContext : AbstractApplication
 {
-    private var _appContext:AppContext? = null
+    private lateinit var _appContext:AppContext
     override val appContext:AppContext
-        get() = _appContext!!
+        get() = _appContext
 
-    internal fun init(appContext: AppContext){
+    private lateinit var _root: Parent
+    val root: Parent
+        get() = _root
+
+    private lateinit var _menuBar: MenuBar
+    val menuBar: MenuBar
+        get() = _menuBar
+
+    internal fun init(appContext: AppContext, root: Parent, menuBar: MenuBar){
         _appContext = appContext
+        _root = root
+        _menuBar = menuBar
         Logger.debug { "Controller initialized"}
     }
 
