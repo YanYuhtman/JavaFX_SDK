@@ -2,6 +2,7 @@ package com.ileveli.javafx_sdk.UI
 
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
@@ -12,6 +13,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.extension
 import kotlin.io.path.pathString
 import kotlin.reflect.KClass
+import kotlin.reflect.typeOf
 
 const val id_root_pan = "ileveli_root_pane"
 const val id_menuBar = "ileveli_menuBar"
@@ -25,28 +27,40 @@ internal object SceneUtils{
         loaderDic.remove(fxmlResourcePath)
         return result
     }
-    internal fun MenuBarWrapper(parent: Parent) : Parent{
+    internal fun MenuBarWrapper(parent: Parent, menuBar: MenuBar = MenuBar()) : Parent{
         val pane = BorderPane().also { pane ->
             pane.id = id_root_pan
         }
-        val menuBar = MenuBar().also { menuBar ->
-            menuBar.isUseSystemMenuBar = true
-            menuBar.id = id_menuBar
-        }
+        menuBar.isUseSystemMenuBar = true
+        menuBar.id = id_menuBar
+
         pane.top = menuBar
         pane.bottom = parent
 
         return pane
     }
-    internal fun <AppContext>LoadFXMl(appContext:AppContext ,fxmlResourcePath:String): Parent
+    internal fun <AppContext>LoadFXMl(appContext:AppContext ,fxmlResourcePath:String, cached: Boolean = true): Parent
             where AppContext : Application{
         val fxmlLoader = FXMLLoader(appContext.javaClass.getResource(verifyFXMLPath(fxmlResourcePath)))
-        loaderDic[fxmlResourcePath] = fxmlLoader
+        if(cached)
+            loaderDic[fxmlResourcePath] = fxmlLoader
         return fxmlLoader.load()
     }
-    internal fun <AppContext>LoadWrappedFXMl(appContext:AppContext ,fxmlResourcePath:String): Parent
+
+    internal fun <AppContext>LoadWrappedFXMl(appContext:AppContext ,fxmlResourcePath:String,fxmlMenuResourcePath: String = ""): Parent
         where AppContext : Application{
-           return MenuBarWrapper(LoadFXMl(appContext,fxmlResourcePath))
+            if(fxmlMenuResourcePath.isEmpty())
+                return MenuBarWrapper(LoadFXMl(appContext,fxmlResourcePath))
+            else {
+                val content = LoadFXMl(appContext, fxmlResourcePath)
+                val menuContainer = LoadFXMl(appContext, fxmlMenuResourcePath, false)
+                val menu: Node = menuContainer.lookup("MenuBar")
+                    ?: throw InterfaceException("Referenced 'fxmlMenuResourcePath: $fxmlMenuResourcePath' must contain item of type ${typeOf<MenuBar>()}")
+
+                return MenuBarWrapper(content,menu as MenuBar)
+
+            }
+
     }
     internal fun verifyFXMLPath(pathString: String):String{
         if(pathString.isBlank())
@@ -74,10 +88,6 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     override val appContext: AppContext
         get() = _appContext
 
-    internal lateinit var _root: Parent
-    val rootParent: Parent
-        get() =  _root
-
 
     internal lateinit var _menuBar: MenuBar
     val menuBar: MenuBar
@@ -86,7 +96,6 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
     private fun _initialize(){
         _appContext = appContext
-        _root = this.lookup("#$id_root_pan") as Parent
         _menuBar = this.lookup("#$id_menuBar") as MenuBar
     }
     /**
@@ -175,10 +184,11 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
      * @constructor Constructs context aware scene by FXML with ready to use ManuBar [AbstractController.menuBar]
      * @param appContext Application class reference
      * @param fxmlResourcePath Subpath to the FXML file - **Relative to the toot of the Context classpath!**
+     * @param fxmlMenuResourcePath Optional, subpath to the FXML file with menu declaration - **Relative to the toot of the Context classpath!**
      * @see javafx.scene.Scene for the rest params
      */
-    constructor(appContext: AppContext, fxmlResourcePath: String, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
-            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath),depthBuffer,antialising){
+    constructor(appContext: AppContext, fxmlResourcePath: String, fxmlMenuResourcePath:String = "", depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
+            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath,fxmlMenuResourcePath),depthBuffer,antialising){
         _initialize(fxmlResourcePath)
     }
 
@@ -188,8 +198,8 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
      * @param fxmlResourcePath Subpath to the FXML file - **Relative to the toot of the Context classpath!**
      * @see javafx.scene.Scene for the rest params
      */
-    constructor(appContext: AppContext, fxmlResourcePath: String, width: Double, height:Double, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
-            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath),width,height,depthBuffer,antialising){
+    constructor(appContext: AppContext, fxmlResourcePath: String,  fxmlMenuResourcePath:String = "", width: Double, height:Double, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
+            :super(appContext, SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath,fxmlMenuResourcePath),width,height,depthBuffer,antialising){
         _initialize(fxmlResourcePath)
 
     }
