@@ -48,7 +48,7 @@ internal object SceneUtils{
 
 abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
         where AppContext : AbstractApplication {
-    val _appContext: AppContext
+    internal val _appContext: AppContext
     override val appContext: AppContext
         get() = _appContext
 
