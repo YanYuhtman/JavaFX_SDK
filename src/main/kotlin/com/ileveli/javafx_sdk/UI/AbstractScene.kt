@@ -93,10 +93,10 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
     internal lateinit var _menuBar: MenuBar
     val menuBar: MenuBar
-        get() =  menuBar
+        get() =  _menuBar
 
 
-    private fun _initialize(){
+    private fun _initialize(appContext: AppContext){
         _appContext = appContext
         _menuBar = this.lookup("#$id_menuBar") as MenuBar
     }
@@ -107,7 +107,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
      */
     constructor(appContext: AppContext, root: Parent, depthBuffer: Boolean = false, antialising: SceneAntialiasing? = null)
             : super ( SceneUtils.MenuBarWrapper(root),-1.0,-1.0,depthBuffer,antialising){
-        this._appContext = appContext
+        _initialize(appContext)
 
     }
 
