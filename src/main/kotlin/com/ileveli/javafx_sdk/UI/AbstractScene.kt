@@ -37,7 +37,7 @@ internal object SceneUtils{
         _menuBar.id = id_menuBar
 
         pane.top = _menuBar
-        pane.bottom = parent
+        pane.center = parent
 
         return pane
     }
