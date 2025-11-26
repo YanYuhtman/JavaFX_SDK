@@ -171,8 +171,9 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
 
     internal fun attachController(controller:Controller){
         _controller = controller
-        if(!controller.controllerScope.isActive)
+        if(controller._controllerScope == null || !controller.controllerScope.isActive)
             controller._controllerScope = CustomCoroutineScope(scene.sceneScope, "ControllerScope")
+
         modelState = ModelState.CONTROLLER_ATTACHED
         Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
     }
