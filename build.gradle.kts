@@ -56,6 +56,12 @@ dependencies {
 
     //Tests
     testImplementation(kotlin("test"))
+
+    //Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.10.2")
+
+
 }
 
 tasks.withType<Test> {

@@ -1,6 +1,10 @@
 package com.ileveli.javafx_sdk.UI
 
+import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
 import javafx.application.Platform
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 
 
 /**
@@ -49,6 +53,13 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
     override val appContext: AppContext
         get() = _appContext?.let { return it } ?: throw InterfaceException("The application context is not attached!")
 
+    override val appScope: CoroutineScope
+        get() = _appContext?.let { return it.appScope } ?: throw InterfaceException("The application context is not attached!")
+
+    private var _modelScope = CustomCoroutineScope()
+    val modelScope: CoroutineScope
+        get() = _modelScope
+
     internal var _scene:Scene? = null
     /**
      * @return The attached scene
@@ -61,6 +72,9 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
     internal fun attachScene(scene: Scene){
         _scene = scene
         _appContext = scene.appContext
+        if(!modelScope.isActive)
+            _modelScope = CustomCoroutineScope()
+
         modelState = ModelState.SCENE_ATTACHED
         Platform.runLater {
             modelState = ModelState.SCENE_SHOWN
@@ -71,6 +85,7 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
 
     internal fun detachScene(){
         Logger.debug { "Scene ${scene::class} detaching from the the model\n${this@AbstractSceneModel::class}" }
+        modelScope.cancel()
         _scene = null
         modelState = ModelState.SCENE_DETACHED
         _appContext = null
@@ -155,13 +170,16 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
         get() = _controller?.let { return it } ?: throw InterfaceException("The controller is not attached!")
 
     internal fun attachController(controller:Controller){
-        _controller = controller;
+        _controller = controller
+        if(!controller.controllerScope.isActive)
+            controller._controllerScope = CustomCoroutineScope()
         modelState = ModelState.CONTROLLER_ATTACHED
         Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
     }
 
     internal fun detachController(){
         Logger.debug { "Controller ${controller::class} detaching from the the model ${this@AbstractControllerModel::class}" }
+        _controller?.controllerScope?.cancel()
         _controller = null
         modelState = ModelState.CONTROLLER_DETACHED
 

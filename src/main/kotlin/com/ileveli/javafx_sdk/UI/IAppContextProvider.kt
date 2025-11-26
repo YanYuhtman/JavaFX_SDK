@@ -1,5 +1,7 @@
 package com.ileveli.javafx_sdk.UI
 
+import kotlinx.coroutines.CoroutineScope
+
 /**
  * Defines context ware entity
  * @param AppContext Application instance
@@ -7,5 +9,6 @@ package com.ileveli.javafx_sdk.UI
  */
 interface IAppContextProvider<AppContext> where AppContext : AbstractApplication {
     val appContext:AppContext
+    val appScope : CoroutineScope
 
 }

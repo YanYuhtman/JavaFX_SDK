@@ -1,10 +1,15 @@
 package com.ileveli.javafx_sdk.UI
 
+import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
 import javafx.collections.ObservableList
 import javafx.fxml.Initializable
 import javafx.scene.Parent
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlin.coroutines.CoroutineContext
 
 
 /**
@@ -16,6 +21,14 @@ abstract class AbstractController<AppContext> : Initializable, IAppContextProvid
     private lateinit var _appContext:AppContext
     override val appContext:AppContext
         get() = _appContext
+
+    override val appScope: CoroutineScope
+        get() = appContext.appScope
+
+    internal var _controllerScope = CustomCoroutineScope()
+    val controllerScope: CoroutineScope
+        get() = _controllerScope
+
 
     private lateinit var _root: Parent
     val root: Parent

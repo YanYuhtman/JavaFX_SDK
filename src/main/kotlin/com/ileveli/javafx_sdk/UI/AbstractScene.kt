@@ -1,6 +1,8 @@
 package com.ileveli.javafx_sdk.UI
 
+import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
 import javafx.application.Application
+import javafx.event.EventHandler
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.Parent
@@ -8,7 +10,16 @@ import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
 import javafx.scene.control.MenuBar
 import javafx.scene.layout.BorderPane
+import javafx.stage.Stage
+import javafx.stage.WindowEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
+import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.extension
 import kotlin.io.path.pathString
@@ -90,6 +101,10 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     override val appContext: AppContext
         get() = _appContext
 
+    override val appScope : CoroutineScope
+        get() = _appContext.appScope
+
+    val sceneScope = CustomCoroutineScope()
 
     internal lateinit var _menuBar: MenuBar
     val menuBar: MenuBar
@@ -109,6 +124,21 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
             : super ( SceneUtils.MenuBarWrapper(root),-1.0,-1.0,depthBuffer,antialising){
         _initialize(appContext)
 
+
+        //Receiving close event workaround
+        appScope.launch {
+            var attachedToStage: Stage? = null
+            while (attachedToStage == null){
+                attachedToStage = (this@AbstractScene.window as Stage?)
+                delay(100)
+
+            }
+            Logger.info {"Scene ${this@AbstractScene::javaClass} attached to stage ${attachedToStage.title}\n"}
+            attachedToStage.onCloseRequest = EventHandler<WindowEvent> {
+                Logger.info {"${this@AbstractScene::javaClass}: On stage close request"}
+                sceneScope.cancel()
+            }
+        }
     }
 
     /**
