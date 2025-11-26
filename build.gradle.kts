@@ -58,8 +58,10 @@ dependencies {
     testImplementation(kotlin("test"))
 
     //Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.10.2")
+    var coroutinesVersion = "1.10.2"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:${coroutinesVersion}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesVersion}")
 
 
 }

@@ -25,9 +25,9 @@ abstract class AbstractController<AppContext> : Initializable, IAppContextProvid
     override val appScope: CoroutineScope
         get() = appContext.appScope
 
-    internal var _controllerScope = CustomCoroutineScope()
+    internal var _controllerScope: CoroutineScope? = null
     val controllerScope: CoroutineScope
-        get() = _controllerScope
+        get() = _controllerScope?.let { it } ?: throw InterfaceException("The controller scope not yet initialized")
 
 
     private lateinit var _root: Parent

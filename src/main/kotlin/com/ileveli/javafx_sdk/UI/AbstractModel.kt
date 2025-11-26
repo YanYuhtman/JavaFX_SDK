@@ -56,9 +56,9 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
     override val appScope: CoroutineScope
         get() = _appContext?.let { return it.appScope } ?: throw InterfaceException("The application context is not attached!")
 
-    private var _modelScope = CustomCoroutineScope()
+    private var _modelScope: CoroutineScope? = null
     val modelScope: CoroutineScope
-        get() = _modelScope
+        get() = _modelScope?.let { it } ?: throw InterfaceException("The model scope not yet initialized")
 
     internal var _scene:Scene? = null
     /**
@@ -72,8 +72,8 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
     internal fun attachScene(scene: Scene){
         _scene = scene
         _appContext = scene.appContext
-        if(!modelScope.isActive)
-            _modelScope = CustomCoroutineScope()
+        if(_modelScope == null || !modelScope.isActive)
+            _modelScope = CustomCoroutineScope(scene.sceneScope, "ModelScope")
 
         modelState = ModelState.SCENE_ATTACHED
         Platform.runLater {
@@ -172,7 +172,7 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
     internal fun attachController(controller:Controller){
         _controller = controller
         if(!controller.controllerScope.isActive)
-            controller._controllerScope = CustomCoroutineScope()
+            controller._controllerScope = CustomCoroutineScope(scene.sceneScope, "ControllerScope")
         modelState = ModelState.CONTROLLER_ATTACHED
         Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
     }

@@ -104,7 +104,9 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     override val appScope : CoroutineScope
         get() = _appContext.appScope
 
-    val sceneScope = CustomCoroutineScope()
+    private var _sceneScope: CoroutineScope? = null
+    val sceneScope: CoroutineScope
+        get() = _sceneScope?.let { it } ?: throw InterfaceException("The scene scope not yet initialized")
 
     internal lateinit var _menuBar: MenuBar
     val menuBar: MenuBar
@@ -113,6 +115,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
     private fun _initialize(appContext: AppContext){
         _appContext = appContext
+        _sceneScope = CustomCoroutineScope(appContext.appScope, "SceneScope")
         _menuBar = this.lookup("#$id_menuBar") as MenuBar
     }
     /**
@@ -135,8 +138,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
             }
             Logger.info {"Scene ${this@AbstractScene::javaClass} attached to stage ${attachedToStage.title}\n"}
             attachedToStage.onCloseRequest = EventHandler<WindowEvent> {
-                Logger.info {"${this@AbstractScene::javaClass}: On stage close request"}
-                sceneScope.cancel()
+                detachScene()
             }
         }
     }
@@ -149,6 +151,15 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     constructor(appContext: AppContext, root: Parent, width: Double, height:Double, depthBuffer: Boolean = false, antialising: SceneAntialiasing?)
             : super (root,width,height,depthBuffer,antialising){
         this._appContext = appContext
+    }
+
+    private fun detachScene(){
+        Logger.info {"${this@AbstractScene::javaClass}: Detaching the scene from stage"}
+        val mKeys = modelCache.keys
+        sceneScope.cancel()
+        for(key in mKeys){
+            detachModel(key)
+        }
     }
 
     private val modelCache = mutableMapOf<KClass<out IModel>, IModel>()
@@ -177,6 +188,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     fun detachModel(clazz: KClass<out IModel>) : Boolean{
         return modelCache[clazz]?.let {
             OnModelUncached(it)
+            modelCache.remove(clazz)
             true
         }?: false
     }
