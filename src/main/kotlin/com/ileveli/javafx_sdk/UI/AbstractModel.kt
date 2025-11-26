@@ -1,5 +1,7 @@
 package com.ileveli.javafx_sdk.UI
 
+import javafx.application.Platform
+
 
 /**
  * Model state attach detach component status
@@ -8,6 +10,7 @@ enum class ModelState{
     DETACHED,
     ATTACHED,
     SCENE_ATTACHED,
+    SCENE_SHOWN,
     SCENE_DETACHED,
     CONTROLLER_ATTACHED,
     CONTROLLER_DETACHED,
@@ -59,6 +62,9 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         _scene = scene
         _appContext = scene.appContext
         modelState = ModelState.SCENE_ATTACHED
+        Platform.runLater {
+            modelState = ModelState.SCENE_SHOWN
+        }
 
         Logger.debug { "Scene ${scene::class} attached to the the model\n${this@AbstractSceneModel::class}" }
     }
@@ -75,6 +81,7 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         OnModelStateChanged(modelState)
         when(modelState){
             ModelState.ATTACHED -> OnAttached()
+            ModelState.SCENE_SHOWN -> OnSceneShown()
             ModelState.DETACHED -> OnDetached()
             else -> Unit
         }
@@ -92,6 +99,10 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
      */
     abstract fun OnAttached()
 
+    /**
+     * Called later when scene is in show state
+     */
+    abstract fun OnSceneShown()
     /**
      * Called when model detached from all components
      */
