@@ -4,9 +4,6 @@ import com.ileveli.javafx_sdk.UI.Logger
 import java.lang.ref.WeakReference
 import kotlin.collections.mutableMapOf
 
-
-
-
 abstract class AbstractEventHandler<F> where F : Function<*>  {
     private var handlersList = mutableMapOf<Int,Pair<WeakReference<Any>,F>>()
 
@@ -17,7 +14,7 @@ abstract class AbstractEventHandler<F> where F : Function<*>  {
      * Despite making it weak drops immediately. There is option to use softReference ... but not much difference
      */
     private fun <T> getComponentsFromClosure(handler: F, result: (key:Int,receiver:Any)-> T) : T {
-        var caller = handler as kotlin.jvm.internal.FunctionReference
+        val caller = handler as kotlin.jvm.internal.FunctionReference
         val receiver = caller.boundReceiver
         val key = System.identityHashCode(receiver)
         return result(key,receiver)
