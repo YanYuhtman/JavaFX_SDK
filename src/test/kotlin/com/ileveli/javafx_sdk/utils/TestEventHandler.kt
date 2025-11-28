@@ -43,6 +43,7 @@ class TestEventHandler {
         //SHIT! It does not work
         runBlocking {
             for (i in 0..10) {
+                System.gc()
                 delay(100)
                 handler.fireEvent("Hello")
                 System.gc()
@@ -51,6 +52,8 @@ class TestEventHandler {
         }
         System.gc()
         assert(someInstance!!.get() == null){"Instance not collected"}
+        assert(false)
+
 
     }
 

@@ -33,6 +33,11 @@ interface IModel{
 abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvider<AppContext>, ISceneProvider<AppContext, AbstractScene<AppContext>>
     where AppContext : AbstractApplication, Scene : AbstractScene<AppContext> {
 
+    private var _isModelAttached = false
+    var isModelAttached: Boolean
+        get() = _isModelAttached
+        protected set(value) { _isModelAttached = value }
+
     internal var _modelState = ModelState.DETACHED
     open var modelState: ModelState
         get() = _modelState
@@ -41,10 +46,12 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
             onModelStateChanged()
             if(value == ModelState.SCENE_ATTACHED){
                 _modelState = ModelState.ATTACHED
+                isModelAttached = true
                 onModelStateChanged()
             }
             else if(value == ModelState.SCENE_DETACHED) {
                 modelState = ModelState.DETACHED
+                isModelAttached = false
                 onModelStateChanged()
             }
         }
@@ -148,12 +155,14 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
             val oldState = _modelState
             _modelState = value
             onModelStateChanged()
-            if(_scene != null && _controller != null) {
+            if(!isModelAttached && _scene != null && _controller != null) {
                 _modelState = ModelState.ATTACHED
+                isModelAttached = true
                 onModelStateChanged()
             }
-            else if(_scene == null && _controller == null) {
+            else if(isModelAttached && _scene == null && _controller == null) {
                 _modelState = ModelState.DETACHED
+                isModelAttached = false
                 onModelStateChanged()
             }
         }
