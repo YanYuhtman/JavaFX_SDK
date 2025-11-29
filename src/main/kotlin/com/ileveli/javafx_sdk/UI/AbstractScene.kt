@@ -152,7 +152,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
     private fun detachScene(){
         Logger.info {"${this@AbstractScene::javaClass}: Detaching the scene from stage"}
-        val mKeys = modelCache.keys
+        val mKeys = modelCache.keys.toList()
         sceneScope.cancel()
         for(key in mKeys){
             detachModel(key)
