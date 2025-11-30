@@ -30,19 +30,24 @@ class BufferedUpdater<T> constructor(
 ){
     private var _buffer = mutableListOf<T>()
     private var _isPoolRunning = false
-
+    private fun MutableList<T>.addSynced(record: T) = synchronized(_buffer){
+        _buffer.add(record)
+    }
+    private fun MutableList<T>.removeFirstOrNullSynced(): T? = synchronized(_buffer){
+        _buffer.removeFirstOrNull()
+    }
 
     public fun add(record:T){
-        _buffer.add(record)
+        _buffer.addSynced(record)
         if(!_isPoolRunning) {
             scopeProvider().launch {
                 _isPoolRunning = true
                 withContext(dispatcher) {
                     while (!_buffer.isEmpty()) {
-                        //In case there are many records coming shortly, without buffering interface will freeze
+                        //In case there are many records coming shortly, without buffering UI will freeze
                         if(delayTime <= 0) yield() else delay(delayTime)
                         for(i in 0..<bundleSize)
-                            _buffer.removeFirstOrNull()?.let { processRecord(it) } ?: continue
+                            _buffer.removeFirstOrNullSynced()?.let { processRecord(it) } ?: continue
                     }
                 }
                 _isPoolRunning = false
