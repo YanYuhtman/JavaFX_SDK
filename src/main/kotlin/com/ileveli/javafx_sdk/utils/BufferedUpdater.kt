@@ -49,4 +49,7 @@ class BufferedUpdater<T> constructor(
             }
         }
     }
+    fun clear(){
+        _buffer.clear()
+    }
 }
