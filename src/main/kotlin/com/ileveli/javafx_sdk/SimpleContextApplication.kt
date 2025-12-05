@@ -28,6 +28,9 @@ class SimpleContextApplication : AbstractApplication() {
     lateinit var pane: Pane
     lateinit var stage: Stage
     lateinit var scene: AbstractScene<SimpleContextApplication>
+
+    override fun init() {
+    }
     override fun start(stage: Stage) {
             refToSelf = this
             this.stage = stage

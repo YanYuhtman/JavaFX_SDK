@@ -6,6 +6,7 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
     id("maven-publish")
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 group = "com.ileveli.javafx_sdk"
@@ -62,6 +63,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:${coroutinesVersion}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesVersion}")
+
+    //Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
 
 }

@@ -4,7 +4,6 @@ import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Application
-import javafx.application.Platform
 import kotlinx.coroutines.cancel
 import kotlin.system.exitProcess
 
@@ -16,7 +15,10 @@ val Logger: KLogger
  */
 abstract class AbstractApplication : Application() {
     val appScope = CustomCoroutineScope("AppScope")
+    val localization: Localization = Localization(this)
 
+    fun getString(key:String) = localization.getString(key)
+    fun getString(key:String,default:String?) = localization.getString(key,default)
     init {
          Thread.setDefaultUncaughtExceptionHandler {
                  thread, exception ->  Logger.error(exception){"$thread Unhandled exception!" }
