@@ -54,7 +54,7 @@ class BufferedUpdater<T> constructor(
             }
         }
     }
-    fun clear(){
+    fun clear() = synchronized(_buffer){
         _buffer.clear()
     }
 }
