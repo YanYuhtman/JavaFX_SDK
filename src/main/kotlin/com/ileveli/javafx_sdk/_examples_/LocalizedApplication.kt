@@ -30,10 +30,10 @@ class LocalizedApplication : AbstractApplication(){
         return scene
     }
     lateinit var stage: Stage
-    override fun start(primaryStage: Stage?) {
+    override fun start(primaryStage: Stage) {
         super.start(primaryStage)
         refToSelf = this
-        stage = primaryStage!!
+        stage = primaryStage
 
         postCompositionAction?.invoke(this)
         primaryStage.show()

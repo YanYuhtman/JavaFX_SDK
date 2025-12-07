@@ -10,7 +10,7 @@ import org.junit.platform.commons.annotation.Testable
 @Testable
 class TestLogger : AbstractApplication(){
 
-    override fun start(primaryStage: Stage?) {
+    override fun start(primaryStage: Stage) {
         Logger.info { "Info message" }
         Logger.debug { "Debug message" }
         Logger.error(Exception("Test error")) { "Error message" }

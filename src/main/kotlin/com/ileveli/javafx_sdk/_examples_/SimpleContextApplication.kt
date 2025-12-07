@@ -29,10 +29,10 @@ class SimpleContextApplication : AbstractApplication() {
 
     override fun init() {
     }
-    override fun start(stage: Stage?) {
+    override fun start(stage: Stage) {
     super.start(stage)
             refToSelf = this
-            this.stage = stage!!
+            this.stage = stage
             pane = Pane(Circle(50.0).also {
             it.centerX = 70.0
             it.centerY =  70.0

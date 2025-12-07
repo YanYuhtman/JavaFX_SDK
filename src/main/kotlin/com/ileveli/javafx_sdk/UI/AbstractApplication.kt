@@ -47,10 +47,10 @@ abstract class AbstractApplication : Application() {
          }
     }
     protected open fun mainSceneResolver(): Scene? = null
-    override fun start(primaryStage: Stage?) {
+    override fun start(primaryStage: Stage) {
         _primaryStage = primaryStage
         mainSceneResolver()?.let {
-            primaryStage?.scene = it
+            primaryStage.scene = it
         }
 
     }
