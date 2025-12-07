@@ -8,4 +8,8 @@ module com.ileveli.javafx_sdk {
 
     opens com.ileveli.javafx_sdk to javafx.fxml;
     exports com.ileveli.javafx_sdk;
+
+    //Examples and tests module
+    opens com.ileveli.javafx_sdk._examples_ to javafx.fxml;
+    exports com.ileveli.javafx_sdk._examples_;
 }

@@ -1,9 +1,7 @@
-package com.ileveli.javafx_sdk
+package com.ileveli.javafx_sdk._examples_
 
 import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.AbstractScene
-import javafx.application.Application
-import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
@@ -22,7 +20,7 @@ class SimpleContextApplication : AbstractApplication() {
 
         fun show(postAction: (SimpleContextApplication.()-> Unit)? = null){
             Companion.postCompositionAction = postAction
-            Application.launch(SimpleContextApplication::class.java)
+            launch(SimpleContextApplication::class.java)
         }
     }
     lateinit var pane: Pane
@@ -31,9 +29,10 @@ class SimpleContextApplication : AbstractApplication() {
 
     override fun init() {
     }
-    override fun start(stage: Stage) {
+    override fun start(stage: Stage?) {
+    super.start(stage)
             refToSelf = this
-            this.stage = stage
+            this.stage = stage!!
             pane = Pane(Circle(50.0).also {
             it.centerX = 70.0
             it.centerY =  70.0

@@ -1,9 +1,9 @@
 package com.ileveli.javafx_sdk
 
+import com.ileveli.javafx_sdk._examples_.SimpleContextApplication
 import com.ileveli.javafx_sdk.UI.AbstractScene
 import com.ileveli.javafx_sdk.UI.AbstractSceneModel
 import com.ileveli.javafx_sdk.UI.Logger
-import javafx.application.Application
 import javafx.application.Platform
 import javafx.scene.Parent
 import kotlinx.coroutines.CancellationException
@@ -11,10 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.platform.commons.annotation.Testable
 import kotlin.random.Random

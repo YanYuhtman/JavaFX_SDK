@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1">
+<!--      fx:controller="CONTROLLER">-->
+    <!--            prefHeight="400.0" prefWidth="600.0">-->
+    <MenuBar useSystemMenuBar="true" >
+        <Menu fx:id="menuGroup" text="%locale_hello">
+            <MenuItem fx:id="menuItem1" text="%locale_hello" />
+            <MenuItem fx:id="menuItem2" text="%locale_hello" />
+        </Menu>
+    </MenuBar>
+</Pane>

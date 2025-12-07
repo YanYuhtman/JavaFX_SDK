@@ -1,6 +1,12 @@
-package com.ileveli.javafx_sdk.UI
+package com.ileveli.javafx_sdk.utils
 
+import com.ileveli.javafx_sdk.UI.AbstractApplication
+import com.ileveli.javafx_sdk.UI.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -16,6 +22,7 @@ import java.io.FileOutputStream
 import java.util.Locale
 import java.util.MissingResourceException
 import java.util.ResourceBundle
+import kotlin.concurrent.thread
 
 class LocalSerializable: KSerializer<Locale>{
     override val descriptor: SerialDescriptor
@@ -42,15 +49,26 @@ class Localization constructor(val appContext: AbstractApplication) {
     private var _bundle: ResourceBundle? = null
     private val json = Json {prettyPrint = true}
 
-    init {
-        loadSettings()
-    }
+    init { loadSettings() }
     var locale: Locale
         get() = _localSettings.locale
         set(value) {
             _localSettings.locale = value
             resolveBundle(value)
             saveSettings()
+        }
+    val bundle: ResourceBundle
+        get() {
+            //in case loading takes place
+            while (loadingMutex.isLocked)
+                Thread.sleep(50)
+
+            return _bundle?.let { it } ?: run {
+                    //loading settings in main thread, it should never happen
+                    loadSettingsRaw()
+                    _bundle?.let { it } ?: throw Exception("Unable to resolve resource bundle!")
+               }
+
         }
     fun getString(key: String) = getString(key,key)
     fun getString(key:String, default:String? = null) = _bundle?.let {
@@ -70,11 +88,12 @@ class Localization constructor(val appContext: AbstractApplication) {
                 ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,locale)
             }
             if(_bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
-                throw MissingResourceException("Custom missing resource exception",null,locale?.toLanguageTag())
+                throw MissingResourceException("Missing resource for locale: $locale",null,locale?.toLanguageTag())
         }catch (e: Exception){
             Logger.warn(e) { "Unable to load localization resource file:" +
                     "${LocaleSettings.resourceFileNamePrefix}_${_localSettings.locale}" +
-                    " for locale: ${_localSettings.locale}" }
+                    " for locale: ${_localSettings.locale}." +
+                    " Default will be loaded instead" }
             try {
                 _bundle = ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix, Locale.ROOT)
             }catch (e2: Exception){
@@ -82,21 +101,29 @@ class Localization constructor(val appContext: AbstractApplication) {
             }
         }
     }
-    private fun loadSettings(){
-        appContext.appScope.launch {
-            try {
-                _localSettings = FileInputStream(LocaleSettings.fileName).use {
-                    return@use json.decodeFromStream<LocaleSettings>(it)
-                }
-            }catch (e: Exception){
-                Logger.warn(e) { "Unable to load locale setting:  ${_localSettings}. Defaults will be used:"}
-                resolveBundle(null)
+    private val loadingMutex = Mutex()
+    private fun loadSettingsRaw(){
+
+        try {
+            _localSettings = FileInputStream(LocaleSettings.fileName).use {
+                return@use json.decodeFromStream<LocaleSettings>(it)
             }
-            resolveBundle(_localSettings.locale)
+        }catch (e: Exception){
+            Logger.warn(e) { "Unable to load locale setting:  ${_localSettings}. Defaults will be used:"}
+            resolveBundle(null)
+        }
+        resolveBundle(_localSettings.locale)
+
+    }
+    private fun loadSettings(){
+        appContext.appScope.launch(Dispatchers.IO) {
+           loadingMutex.withLock {
+               loadSettingsRaw()
+           }
         }
     }
     private fun saveSettings(){
-        appContext.appScope.launch {
+        appContext.appScope.launch(Dispatchers.IO) {
             try {
                 FileOutputStream(LocaleSettings.fileName).use {
                     json.encodeToStream(_localSettings, it)
