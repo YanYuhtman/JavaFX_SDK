@@ -2,6 +2,7 @@ package com.ileveli.javafx_sdk.utils
 
 import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.Logger
+import com.ileveli.javafx_sdk.UI.iLeveliException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -55,8 +56,12 @@ class Localization constructor(val appContext: AbstractApplication) {
     var locale: Locale
         get() = _localSettings.locale
         set(value) {
+            if(value == Locale.ROOT && value == Locale.getDefault()){
+                _localSettings.locale = value
+                return
+            }
+            resolveBundleOrThrow(value)
             _localSettings.locale = value
-            resolveBundle(value)
             saveSettings()
         }
     val bundle: ResourceBundle
@@ -84,13 +89,16 @@ class Localization constructor(val appContext: AbstractApplication) {
         Logger.warn { "The bundle isn't initialized, returning the key: ${key}" }
         return@run key
     }
+    private fun resolveBundleOrThrow(locale: Locale?){
+        _bundle = locale?.let {
+            ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,locale)
+        }
+        if(_bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
+            throw iLeveliException("Missing resource for locale: ${locale?.toLanguageTag() ?: "NULL"}")
+    }
     private fun resolveBundle(locale: Locale?){
         try {
-            _bundle = locale?.let {
-                ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,locale)
-            }
-            if(_bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
-                throw MissingResourceException("Missing resource for locale: $locale",null,locale?.toLanguageTag())
+           resolveBundleOrThrow(locale)
         }catch (e: Exception){
             Logger.warn(e) { "Unable to load localization resource file:" +
                     "${LocaleSettings.resourceFileNamePrefix}_${_localSettings.locale}" +

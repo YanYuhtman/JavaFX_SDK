@@ -62,7 +62,7 @@ abstract class AbstractApplication : Application() {
         _primaryStage?.let {pStage ->
             this.mainSceneResolver()?.let {
                 pStage.scene = it
-            }?: throw iLeveliException("In order to use restartUI you must provide mainSceneResolver")
+            }?: throw iLeveliException("In order to use restartUI one must override mainSceneResolver() and provide a Scene")
         }?: throw iLeveliException("Primary stage is not attached, make sure you've called super.start()")
     }
 }

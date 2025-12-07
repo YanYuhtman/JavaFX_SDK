@@ -10,6 +10,7 @@ import javafx.scene.control.Label
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertThrows
 import java.util.Locale
+import java.util.MissingResourceException
 import kotlin.test.Test
 
 class LocaleTest {
@@ -65,6 +66,9 @@ class LocaleTest {
         SimpleContextApplication.show {
             assertThrows<iLeveliException>("Exception must be thrown",{
                 setLocale(Locale("he"))
+            })
+            assertThrows<iLeveliException>("Exception must be thrown",{
+                setLocale(Locale("en"))
             })
             Platform.exit()
         }
