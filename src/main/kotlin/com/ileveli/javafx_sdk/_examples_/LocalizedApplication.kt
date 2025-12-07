@@ -22,7 +22,7 @@ class LocalizedApplication : AbstractApplication(){
         }
     }
 
-    override fun mainSceneResolver(): Scene? {
+    override fun mainSceneResolver(stage: Stage): Scene? {
         val scene = object : AbstractFXMLScene<LocalizedApplication, LocalizationController>(this,"localization_view.fxml", "localization_menu.fxml"
             /*,ResourceBundle.getBundle("Messages", Locale("ru"))*/){
 

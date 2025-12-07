@@ -65,7 +65,7 @@ internal object SceneUtils{
                 return MenuBarWrapper(LoadFXMl(appContext,fxmlResourcePath,bundle))
             else {
                 val content = LoadFXMl(appContext, fxmlResourcePath,bundle)
-                val menuContainer = LoadFXMl(appContext, fxmlMenuResourcePath,bundle, false)
+                val menuContainer = LoadFXMl(appContext, fxmlMenuResourcePath,bundle, true)
                 val menu: Node = menuContainer.lookup("MenuBar")
                     ?: throw InterfaceException("Referenced 'fxmlMenuResourcePath: $fxmlMenuResourcePath' must contain item of type ${typeOf<MenuBar>()}")
 
@@ -216,15 +216,20 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppContext>
         where AppContext : AbstractApplication, Controller : AbstractController<AppContext>{
     protected lateinit var loader: FXMLLoader
+    protected lateinit var menuLoader: FXMLLoader
 
     val controller:Controller
         get() = loader.getController<Controller>()
+    val menuController: AbstractController<AppContext>
+        get() = menuLoader.getController<AbstractController<AppContext>>()
 
-    private fun _initialize(fxmlResourcePath: String){
+    private fun _initialize(fxmlResourcePath: String, fxmlMenuResourcePath: String){
         this.loader = SceneUtils.DemandLoader(fxmlResourcePath)
+        this.menuLoader = SceneUtils.DemandLoader(fxmlMenuResourcePath)
         val rootPane = this.lookup("#$id_root_pan") as Parent
         val menuBar = this.lookup("#$id_menuBar") as MenuBar
         controller.init(appContext,rootPane,menuBar)
+        menuController.init(appContext,rootPane,menuBar)
 
     }
     /**
@@ -239,7 +244,7 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
         , SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath,fxmlMenuResourcePath, resourceBundle?.let { it }?:appContext.resourceBundle)
         ,depthBuffer,antialising)
     {
-        _initialize(fxmlResourcePath)
+        _initialize(fxmlResourcePath,fxmlMenuResourcePath)
     }
 
     /**
@@ -252,7 +257,7 @@ abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppConte
             :super(1,appContext
         , SceneUtils.LoadWrappedFXMl(appContext,fxmlResourcePath,fxmlMenuResourcePath,bundle)
         ,width,height,depthBuffer,antialising){
-        _initialize(fxmlResourcePath)
+        _initialize(fxmlResourcePath,fxmlMenuResourcePath)
 
     }
 

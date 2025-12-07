@@ -26,7 +26,6 @@ class LocalizationController : AbstractController<LocalizedApplication>() {
         }
     }
 
-    override fun initialize(location: URL?, resources: ResourceBundle?) {
-
+    override fun onContextInitialized(appContext: LocalizedApplication) {
     }
 }

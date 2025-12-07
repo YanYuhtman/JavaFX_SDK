@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Abstract Context aware controller
  */
-abstract class AbstractController<AppContext> : Initializable, IAppContextProvider<AppContext>
+abstract class AbstractController<AppContext> :  IAppContextProvider<AppContext>
         where AppContext : AbstractApplication
 {
     private lateinit var _appContext:AppContext
@@ -46,8 +46,10 @@ abstract class AbstractController<AppContext> : Initializable, IAppContextProvid
         _appContext = appContext
         _root = root
         _menuBar = menuBar
+        onContextInitialized(appContext)
         Logger.debug { "Controller initialized"}
     }
+    protected abstract fun onContextInitialized(appContext: AppContext)
 
     //    private val modelsMap = mutableMapOf<KClass<*>,AbstractModel<AppContext, AbstractController<AppContext>>>()
 //    fun attachModel(model: AbstractModel<AppContext, AbstractController<AppContext>>){

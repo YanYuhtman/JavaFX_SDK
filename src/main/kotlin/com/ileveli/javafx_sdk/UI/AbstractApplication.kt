@@ -46,10 +46,10 @@ abstract class AbstractApplication : Application() {
              exitProcess(1)
          }
     }
-    protected open fun mainSceneResolver(): Scene? = null
+    protected open fun mainSceneResolver(stage: Stage): Scene? = null
     override fun start(primaryStage: Stage) {
         _primaryStage = primaryStage
-        mainSceneResolver()?.let {
+        mainSceneResolver(primaryStage)?.let {
             primaryStage.scene = it
         }
 
@@ -60,7 +60,7 @@ abstract class AbstractApplication : Application() {
     }
     fun restartUI() {
         _primaryStage?.let {pStage ->
-            this.mainSceneResolver()?.let {
+            this.mainSceneResolver(pStage)?.let {
                 pStage.scene = it
             }?: throw iLeveliException("In order to use restartUI one must override mainSceneResolver() and provide a Scene")
         }?: throw iLeveliException("Primary stage is not attached, make sure you've called super.start()")
