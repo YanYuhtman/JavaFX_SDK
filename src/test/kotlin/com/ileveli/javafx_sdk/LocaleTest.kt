@@ -20,9 +20,11 @@ class LocaleTest {
         SimpleContextApplication.show({
             setLocale(Locale("en"),false)
             Assertions.assertEquals("Hello English", this.getString("locale_hello"),"Default bundle is not loaded")
-            setLocale(Locale("foo"), false)
-            Assertions.assertEquals("Hello Default", this.getString("locale_hello"),"Default bundle is not loaded")
-           setLocale(Locale("ru"),false)
+            setLocale(Locale("ru"),false)
+            Assertions.assertEquals("Здрасте", this.getString("locale_hello"),"Default bundle is not loaded")
+            assertThrows<iLeveliException>("setLocale with invalid locale should throw exception", {
+                setLocale(Locale("foo"), false)
+            })
             Assertions.assertEquals("Здрасте", this.getString("locale_hello"),"Default bundle is not loaded")
 
             Platform.exit()

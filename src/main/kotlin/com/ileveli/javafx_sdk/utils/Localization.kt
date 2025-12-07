@@ -89,12 +89,14 @@ class Localization constructor(val appContext: AbstractApplication) {
         Logger.warn { "The bundle isn't initialized, returning the key: ${key}" }
         return@run key
     }
+
     private fun resolveBundleOrThrow(locale: Locale?){
-        _bundle = locale?.let {
+        val bundle = locale?.let {
             ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,locale)
         }
-        if(_bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
+        if(bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
             throw iLeveliException("Missing resource for locale: ${locale?.toLanguageTag() ?: "NULL"}")
+        _bundle = bundle
     }
     private fun resolveBundle(locale: Locale?){
         try {
