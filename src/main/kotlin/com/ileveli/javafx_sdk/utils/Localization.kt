@@ -4,7 +4,6 @@ import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
@@ -22,7 +21,6 @@ import java.io.FileOutputStream
 import java.util.Locale
 import java.util.MissingResourceException
 import java.util.ResourceBundle
-import kotlin.concurrent.thread
 
 class LocalSerializable: KSerializer<Locale>{
     override val descriptor: SerialDescriptor
@@ -49,7 +47,11 @@ class Localization constructor(val appContext: AbstractApplication) {
     private var _bundle: ResourceBundle? = null
     private val json = Json {prettyPrint = true}
 
-    init { loadSettings() }
+    private lateinit var loadingMutex: Mutex
+    init {
+        loadingMutex = Mutex()
+        loadSettings()
+    }
     var locale: Locale
         get() = _localSettings.locale
         set(value) {
@@ -101,7 +103,7 @@ class Localization constructor(val appContext: AbstractApplication) {
             }
         }
     }
-    private val loadingMutex = Mutex()
+
     private fun loadSettingsRaw(){
 
         try {
@@ -116,7 +118,7 @@ class Localization constructor(val appContext: AbstractApplication) {
 
     }
     private fun loadSettings(){
-        appContext.appScope.launch(Dispatchers.IO) {
+        appContext.appScope.launch(Dispatchers.Default) {
            loadingMutex.withLock {
                loadSettingsRaw()
            }

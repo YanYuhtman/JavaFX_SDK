@@ -2,6 +2,7 @@ package com.ileveli.javafx_sdk._examples_
 
 import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.AbstractFXMLScene
+import javafx.scene.Scene
 import javafx.stage.Stage
 
 class LocalizedApplication : AbstractApplication(){
@@ -20,16 +21,20 @@ class LocalizedApplication : AbstractApplication(){
 
         }
     }
+
+    override fun mainSceneResolver(): Scene? {
+        val scene = object : AbstractFXMLScene<LocalizedApplication, LocalizationController>(this,"localization_view.fxml", "localization_menu.fxml"
+            /*,ResourceBundle.getBundle("Messages", Locale("ru"))*/){
+
+        }
+        return scene
+    }
     lateinit var stage: Stage
     override fun start(primaryStage: Stage?) {
         super.start(primaryStage)
         refToSelf = this
         stage = primaryStage!!
-        val scene = object : AbstractFXMLScene<LocalizedApplication, LocalizationController>(this,"localization_view.fxml", "localization_menu.fxml"
-            /*,ResourceBundle.getBundle("Messages", Locale("ru"))*/){
 
-        }
-        primaryStage.scene = scene
         postCompositionAction?.invoke(this)
         primaryStage.show()
 

@@ -1,13 +1,14 @@
 package com.ileveli.javafx_sdk
 
-import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.AbstractScene
+import com.ileveli.javafx_sdk.UI.iLeveliException
 import com.ileveli.javafx_sdk._examples_.LocalizedApplication
 import com.ileveli.javafx_sdk._examples_.SimpleContextApplication
 import javafx.application.Platform
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.assertThrows
 import java.util.Locale
 import kotlin.test.Test
 
@@ -16,11 +17,11 @@ class LocaleTest {
     fun test(){
 
         SimpleContextApplication.show({
-            locale = Locale("en")
+            setLocale(Locale("en"),false)
             Assertions.assertEquals("Hello English", this.getString("locale_hello"),"Default bundle is not loaded")
-            locale = Locale("foo")
+            setLocale(Locale("foo"), false)
             Assertions.assertEquals("Hello Default", this.getString("locale_hello"),"Default bundle is not loaded")
-            locale = Locale("ru")
+           setLocale(Locale("ru"),false)
             Assertions.assertEquals("Здрасте", this.getString("locale_hello"),"Default bundle is not loaded")
 
             Platform.exit()
@@ -54,18 +55,18 @@ class LocaleTest {
         verifyLocale(menuItemText, "Incorrect menu localization")
     }
     @Test
-    fun getBundleWithBlocking(){
-        LocalizedApplication.show {
+    fun verifyBandleLocale(){
+         LocalizedApplication.show {
             assertLocale(this)
-            Thread.sleep(500)
-            when (this.locale.toLanguageTag()) {
-                "en" -> locale = Locale("ru")
-                "ru" -> locale = Locale("en")
-            }
-
         }
-
-//        assertLocale(LocalizedApplication.refToSelf)
-
+    }
+    @Test
+    fun verifyLocaleException(){
+        SimpleContextApplication.show {
+            assertThrows<iLeveliException>("Exception must be thrown",{
+                setLocale(Locale("he"))
+            })
+            Platform.exit()
+        }
     }
 }

@@ -31,7 +31,7 @@ internal object SceneUtils{
     private val loaderDic = mutableMapOf<String, FXMLLoader>()
     internal fun DemandLoader(fxmlResourcePath: String): FXMLLoader {
         if(!loaderDic.containsKey(fxmlResourcePath))
-            throw Exception("Critical exception! Missing FXMLLoader for key: $fxmlResourcePath")
+            throw iLeveliException("Critical exception! Missing FXMLLoader for key: $fxmlResourcePath")
         val result = loaderDic[fxmlResourcePath]!!
         loaderDic.remove(fxmlResourcePath)
         return result

@@ -6,6 +6,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
 import java.net.URL
+import java.util.Locale
 import java.util.ResourceBundle
 
 class LocalizationController : AbstractController<LocalizedApplication>() {
@@ -19,6 +20,10 @@ class LocalizationController : AbstractController<LocalizedApplication>() {
     @FXML
     private fun onHelloButtonClick() {
         welcomeText.text = "Welcome to JavaFX Application!"
+        when (appContext.locale.toLanguageTag()) {
+            "en" -> appContext.setLocale(Locale("ru"))
+            "ru" -> appContext.setLocale(Locale("en"))
+        }
     }
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {

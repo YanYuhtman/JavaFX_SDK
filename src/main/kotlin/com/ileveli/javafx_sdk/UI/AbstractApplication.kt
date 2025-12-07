@@ -5,7 +5,7 @@ import com.ileveli.javafx_sdk.utils.Localization
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Application
-import javafx.application.Platform
+import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.cancel
 import java.util.*
@@ -20,18 +20,18 @@ val Logger: KLogger
 abstract class AbstractApplication : Application() {
     val appScope = CustomCoroutineScope("AppScope")
     private var _primaryStage: Stage? = null
-    protected val _localization: Localization = Localization(this)
+    protected lateinit var  _localization: Localization
 
     var locale: Locale
         get() = _localization.locale
-        set(value) {
-            _localization.locale = value
-            _primaryStage?.let {
-                it.close()
-                //TODO: Find solution for reloading scene for locale change
-                it.show()
-            }?: Logger.warn { "Unable to relead primary stage! Make sure 'super.start(primaryStage)' been called" }
-        }
+        private set(value) {_localization.locale = value}
+    fun setLocale(locale: Locale, resetUI: Boolean = true){
+        this.locale = locale
+        if(!resetUI)
+            return
+        restartUI()
+    }
+
     val resourceBundle: ResourceBundle
         get() = _localization.bundle
 
@@ -39,31 +39,31 @@ abstract class AbstractApplication : Application() {
     fun getString(key:String,default:String?) = _localization.getString(key,default)
 
     init {
+        _localization = Localization(this)
          Thread.setDefaultUncaughtExceptionHandler {
                  thread, exception ->  Logger.error(exception){"$thread Unhandled exception!" }
              Logger.exit(1)
              exitProcess(1)
          }
     }
-
+    protected open fun mainSceneResolver(): Scene? = null
     override fun start(primaryStage: Stage?) {
         _primaryStage = primaryStage
+        mainSceneResolver()?.let {
+            primaryStage?.scene = it
+        }
+
     }
 
     override fun stop() {
         appScope.cancel()
     }
-
-    fun restartWithSystemExit() {
-        Platform.exit()
-        Thread(Runnable {
-            try {
-                Thread.sleep(1000)
-                Application.launch(this::class.java)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }).start()
+    fun restartUI() {
+        _primaryStage?.let {pStage ->
+            this.mainSceneResolver()?.let {
+                pStage.scene = it
+            }?: throw iLeveliException("In order to use restartUI you must provide mainSceneResolver")
+        }?: throw iLeveliException("Primary stage is not attached, make sure you've called super.start()")
     }
 }
 
