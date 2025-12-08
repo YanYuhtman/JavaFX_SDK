@@ -40,7 +40,7 @@ class LocalSerializable: KSerializer<Locale>{
 data class LocaleSettings(@Serializable(with = LocalSerializable::class) var locale: Locale = Locale.getDefault()){
     companion object{
         val fileName = "locale.json"
-        val resourceFileNamePrefix = "Messages"
+        val resourceFileNamePrefix = "i18n.Messages"
     }
 }
 class Localization constructor(val appContext: AbstractApplication) {
