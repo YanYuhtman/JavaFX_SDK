@@ -8,6 +8,7 @@ import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.cancel
+import java.io.File
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -18,6 +19,8 @@ val Logger: KLogger
  * Basic Application abstraction
  */
 abstract class AbstractApplication : Application() {
+    abstract val packageName:String
+
     val appScope = CustomCoroutineScope("AppScope")
     private var _primaryStage: Stage? = null
     protected lateinit var  _localization: Localization
@@ -65,6 +68,18 @@ abstract class AbstractApplication : Application() {
             }?: throw iLeveliException("In order to use restartUI one must override mainSceneResolver() and provide a Scene")
         }?: throw iLeveliException("Primary stage is not attached, make sure you've called super.start()")
     }
+
+    fun getAppDataDirectory(packageName: String): File {
+        val os = System.getProperty("os.name").lowercase()
+        val dir = when {
+            os.contains("win") -> File(System.getenv("APPDATA") ?: System.getProperty("user.home"), packageName)
+            os.contains("mac") -> File(System.getProperty("user.home"), "Library/Application Support/$packageName")
+            else -> File(System.getProperty("user.home"), ".$packageName") // Linux/Unix
+        }
+        if (!dir.exists()) dir.mkdirs()
+        return dir
+    }
+
 }
 
 

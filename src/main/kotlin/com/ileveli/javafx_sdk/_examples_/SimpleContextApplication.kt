@@ -12,6 +12,8 @@ import javafx.scene.shape.StrokeType
 import javafx.stage.Stage
 
 class SimpleContextApplication : AbstractApplication() {
+    override val packageName: String
+        get() = ""
     companion object{
         lateinit var refToSelf: SimpleContextApplication
         private var postCompositionAction: (SimpleContextApplication.()-> Unit )? = {
