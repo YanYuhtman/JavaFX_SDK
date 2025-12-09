@@ -6,6 +6,9 @@ import javafx.scene.Scene
 import javafx.stage.Stage
 
 class LocalizedApplication : AbstractApplication(){
+    override val packageName: String
+        get() = ""
+
     companion object{
         lateinit var refToSelf: LocalizedApplication
         private var postCompositionAction: (LocalizedApplication.()-> Unit )? = {

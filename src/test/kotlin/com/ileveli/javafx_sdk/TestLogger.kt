@@ -10,6 +10,9 @@ import org.junit.platform.commons.annotation.Testable
 @Testable
 class TestLogger : AbstractApplication(){
 
+    override val packageName: String
+        get() = ""
+
     override fun start(primaryStage: Stage) {
         Logger.info { "Info message" }
         Logger.debug { "Debug message" }

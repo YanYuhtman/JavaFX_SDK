@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -17,6 +18,7 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
@@ -40,7 +42,7 @@ class LocalSerializable: KSerializer<Locale>{
 data class LocaleSettings(@Serializable(with = LocalSerializable::class) var locale: Locale = Locale.getDefault()){
     companion object{
         val fileName = "locale.json"
-        val resourceFileNamePrefix = "Messages"
+        val resourceFileNamePrefix = "i18n.Messages"
     }
 }
 class Localization constructor(val appContext: AbstractApplication) {
@@ -114,10 +116,13 @@ class Localization constructor(val appContext: AbstractApplication) {
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun loadSettingsRaw(){
 
         try {
-            _localSettings = FileInputStream(LocaleSettings.fileName).use {
+            val file = File(appContext.getAppDataDirectory(appContext.packageName), LocaleSettings.fileName)
+            Logger.info { "Loading language settings from: $file" }
+            _localSettings = FileInputStream(file).use {
                 return@use json.decodeFromStream<LocaleSettings>(it)
             }
         }catch (e: Exception){
@@ -134,10 +139,13 @@ class Localization constructor(val appContext: AbstractApplication) {
            }
         }
     }
+    @OptIn(ExperimentalSerializationApi::class)
     private fun saveSettings(){
         appContext.appScope.launch(Dispatchers.IO) {
             try {
-                FileOutputStream(LocaleSettings.fileName).use {
+                val file = File(appContext.getAppDataDirectory(appContext.packageName), LocaleSettings.fileName)
+                Logger.info { "Saving language settings to: $file" }
+                FileOutputStream(file).use {
                     json.encodeToStream(_localSettings, it)
                 }
             }catch (e: Exception){

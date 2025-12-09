@@ -84,7 +84,8 @@ internal object SceneUtils{
         else if(!path.extension.equals("fxml", true))
             throw InvalidParameterException("Path extension should be 'fxml',the ${path.extension} extension is invalid ")
 
-        return path.pathString
+        //Fixes path for resources
+        return path.pathString.replace("\\","/")
     }
 
 }

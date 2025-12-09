@@ -1,12 +1,15 @@
 plugins {
+    val kotlinVersion = "2.1.20"
+
     java
     application
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+    id("org.jetbrains.kotlin.jvm") version kotlinVersion
+    kotlin("plugin.serialization") version kotlinVersion
+
     id("org.javamodularity.moduleplugin") version "1.8.15"
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
     id("maven-publish")
-    kotlin("plugin.serialization") version "1.9.0"
 }
 
 group = "com.ileveli.javafx_sdk"
@@ -23,10 +26,10 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-//application {
-//    mainModule.set("com.ileveli.javafx_sdk")
-//    mainClass.set("com.ileveli.javafx_sdk.HelloApplication")
-//}
+application {
+    mainModule.set("com.ileveli.javafx_sdk")
+    mainClass.set("com.ileveli.javafx_sdk.HelloApplication")
+}
 kotlin {
     jvmToolchain( 17 )
 }
