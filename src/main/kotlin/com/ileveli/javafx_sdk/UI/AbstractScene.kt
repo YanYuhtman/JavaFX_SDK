@@ -112,6 +112,8 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
     val menuBar: MenuBar
         get() =  _menuBar
 
+    val stage: Stage
+        get() = this.window as Stage
 
     private fun _initialize(appContext: AppContext){
         _appContext = appContext
