@@ -58,12 +58,14 @@ class Localization constructor(val appContext: AbstractApplication) {
     var locale: Locale
         get() = _localSettings.locale
         set(value) {
-            if(value == Locale.ROOT && value == Locale.getDefault()){
-                _localSettings.locale = value
-                return
+            var _value = value.toLanguageTag().let {
+                if (it == Locale.ROOT.toLanguageTag()) {
+                    Locale.getDefault()
+                }
+                value
             }
-            resolveBundleOrThrow(value)
-            _localSettings.locale = value
+            resolveBundleOrThrow(_value)
+            _localSettings.locale = _value
             saveSettings()
         }
     val bundle: ResourceBundle
@@ -93,11 +95,15 @@ class Localization constructor(val appContext: AbstractApplication) {
     }
 
     private fun resolveBundleOrThrow(locale: Locale?){
+        var _locale = locale
         val bundle = locale?.let {
-            ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,locale)
-        }
-        if(bundle?.locale != locale && _bundle?.locale != Locale.ROOT)
-            throw iLeveliException("Missing resource for locale: ${locale?.toLanguageTag() ?: "NULL"}")
+           var b = ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,_locale)
+           if(b.locale.toLanguageTag() != _locale.toLanguageTag()){
+                _locale =  Locale(_locale.toLanguageTag().split("_").first())
+                b = ResourceBundle.getBundle(LocaleSettings.resourceFileNamePrefix,_locale)
+            }
+            return@let if(b.keySet().count() > 0) b else null
+        }?: throw iLeveliException("Missing resource or keyset is empty for locale: ${_locale?.toLanguageTag() ?: "NULL"}")
         _bundle = bundle
     }
     private fun resolveBundle(locale: Locale?){
