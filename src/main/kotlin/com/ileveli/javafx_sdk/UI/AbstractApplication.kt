@@ -20,7 +20,7 @@ val Logger: KLogger
 abstract class AbstractApplication : Application() {
     abstract val packageName:String
 
-    val appScope = CustomCoroutineScope("AppScope")
+    val appScope = CustomCoroutineScope("AppScope ${this.javaClass.name}")
     private var _primaryStage: Stage? = null
     protected lateinit var  _localization: Localization
 
@@ -34,7 +34,7 @@ abstract class AbstractApplication : Application() {
         restartUI()
     }
 
-    val resourceBundle: ResourceBundle
+    val resourceBundle: ResourceBundle?
         get() = _localization.bundle
 
     fun getString(key:String) = _localization.getString(key)

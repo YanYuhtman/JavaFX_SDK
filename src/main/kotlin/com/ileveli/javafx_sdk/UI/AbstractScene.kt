@@ -117,7 +117,7 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 
     private fun _initialize(appContext: AppContext){
         _appContext = appContext
-        _sceneScope = CustomCoroutineScope(appContext.appScope, "SceneScope")
+        _sceneScope = CustomCoroutineScope(appContext.appScope, "SceneScope ${this.javaClass.name}")
         _menuBar = this.lookup("#$id_menuBar") as MenuBar
     }
     /**
@@ -219,20 +219,28 @@ abstract class AbstractScene<AppContext> : IAppContextProvider<AppContext>,Scene
 abstract class AbstractFXMLScene<AppContext,Controller> : AbstractScene<AppContext>
         where AppContext : AbstractApplication, Controller : AbstractController<AppContext>{
     protected lateinit var loader: FXMLLoader
-    protected lateinit var menuLoader: FXMLLoader
+    protected var menuLoader: FXMLLoader? = null
 
     val controller:Controller
         get() = loader.getController<Controller>()
-    val menuController: AbstractController<AppContext>
-        get() = menuLoader.getController<AbstractController<AppContext>>()
+            ?: throw iLeveliException("View fxml: ${loader.location} must provide controller")
+
+    val menuController: AbstractController<AppContext>?
+        get() {
+            menuLoader?.getController<AbstractController<AppContext>>()?.let {
+                return it
+            }?: Logger.warn { "Default menu controller is not defined for scene ${this.javaClass.name}" }
+            return null
+        }
 
     private fun _initialize(fxmlResourcePath: String, fxmlMenuResourcePath: String){
         this.loader = SceneUtils.DemandLoader(fxmlResourcePath)
-        this.menuLoader = SceneUtils.DemandLoader(fxmlMenuResourcePath)
+        if(!fxmlMenuResourcePath.isEmpty())
+            this.menuLoader = SceneUtils.DemandLoader(fxmlMenuResourcePath)
         val rootPane = this.lookup("#$id_root_pan") as Parent
         val menuBar = this.lookup("#$id_menuBar") as MenuBar
         controller.init(appContext,rootPane,menuBar)
-        menuController.init(appContext,rootPane,menuBar)
+        menuController?.init(appContext,rootPane,menuBar)
 
     }
     /**

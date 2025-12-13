@@ -2,8 +2,12 @@ package com.ileveli.javafx_sdk._examples_
 
 import com.ileveli.javafx_sdk.UI.AbstractApplication
 import com.ileveli.javafx_sdk.UI.AbstractFXMLScene
+import com.ileveli.javafx_sdk.UI.AbstractScene
 import javafx.scene.Scene
+import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import java.util.Locale
+import java.util.ResourceBundle
 
 class LocalizedApplication : AbstractApplication(){
     override val packageName: String
@@ -26,11 +30,16 @@ class LocalizedApplication : AbstractApplication(){
     }
 
     override fun mainSceneResolver(stage: Stage): Scene? {
-        val scene = object : AbstractFXMLScene<LocalizedApplication, LocalizationController>(this,"localization_view.fxml", "localization_menu.fxml"
-            /*,ResourceBundle.getBundle("Messages", Locale("ru"))*/){
+        val scene = object : AbstractFXMLScene<LocalizedApplication, LocalizationController>(this
+            ,"/com/ileveli/javafx_sdk/_examples_/localization_view.fxml"
+            ,""
+            ,ResourceBundle.getBundle("test/Messages", Locale("ru"))
+            ){
 
         }
         return scene
+        return object : AbstractScene<LocalizedApplication>(this, VBox()){}
+
     }
     lateinit var stage: Stage
     override fun start(primaryStage: Stage) {

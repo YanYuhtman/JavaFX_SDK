@@ -68,16 +68,17 @@ class Localization constructor(val appContext: AbstractApplication) {
             _localSettings.locale = _value
             saveSettings()
         }
-    val bundle: ResourceBundle
+    val bundle: ResourceBundle?
         get() {
             //in case loading takes place
             while (loadingMutex.isLocked)
                 Thread.sleep(50)
 
-            return _bundle?.let { it } ?: run {
+            return _bundle ?: run {
                     //loading settings in main thread, it should never happen
                     loadSettingsRaw()
-                    _bundle?.let { it } ?: throw Exception("Unable to resolve resource bundle!")
+//                    _bundle?.let { it } ?: throw Exception("Unable to resolve resource bundle!")
+                    _bundle
                }
 
         }

@@ -80,7 +80,7 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         _scene = scene
         _appContext = scene.appContext
         if(_modelScope == null || !modelScope.isActive)
-            _modelScope = CustomCoroutineScope(scene.sceneScope, "ModelScope")
+            _modelScope = CustomCoroutineScope(scene.sceneScope, "ModelScope ${this.javaClass.name}")
 
         modelState = ModelState.SCENE_ATTACHED
         Platform.runLater {
@@ -181,7 +181,7 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
     internal fun attachController(controller:Controller){
         _controller = controller
         if(controller._controllerScope == null || !controller.controllerScope.isActive)
-            controller._controllerScope = CustomCoroutineScope(scene.sceneScope, "ControllerScope")
+            controller._controllerScope = CustomCoroutineScope(scene.sceneScope, "ControllerScope ${javaClass.name}")
 
         modelState = ModelState.CONTROLLER_ATTACHED
         Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }

@@ -7,6 +7,7 @@ import com.ileveli.javafx_sdk.UI.Logger
 import javafx.application.Platform
 import javafx.scene.Parent
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
@@ -46,7 +47,7 @@ class ContextApplicationTests {
                                 pane.scaleX += Random.nextDouble(-0.2, 0.3)
                                 pane.scaleY += Random.nextDouble(-0.3, 0.1)
                                 delay(50)
-                                Logger.warn { "Model scope Running" }
+                                Logger.warn { "Model ${coroutineContext[CoroutineName]} scope Running" }
                             }
                         }catch (ce : CancellationException){
                             Logger.error (ce){"The job ${this@launch.coroutineContext} was canceled "}
@@ -72,7 +73,7 @@ class ContextApplicationTests {
                             pane.translateX += Random.nextDouble(-0.5, 0.8)
                             pane.translateY += Random.nextDouble(-0.5, 0.8)
                             delay(50)
-                            Logger.warn { "Running" }
+                            Logger.warn { "Application scope running ${coroutineContext[CoroutineName]}" }
                         }
                     }catch (ce : CancellationException){
                         Logger.info (ce){"The job ${this@launch.coroutineContext} was canceled "}
