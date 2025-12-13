@@ -3,7 +3,6 @@ package com.ileveli.javafx_sdk.UI
 import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
 import com.ileveli.javafx_sdk.utils.Localization
 import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
@@ -13,7 +12,7 @@ import java.util.*
 import kotlin.system.exitProcess
 
 val Logger: KLogger
-    get() = KotlinLogging.logger( Thread.currentThread().stackTrace[2].className )
+    get() = com.ileveli.javafx_sdk.utils.Logger
 
 /**
  * Basic Application abstraction

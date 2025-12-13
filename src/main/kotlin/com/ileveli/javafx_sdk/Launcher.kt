@@ -1,7 +1,7 @@
 package com.ileveli.javafx_sdk
 
-import com.ileveli.javafx_sdk.UI.Logger
 import com.ileveli.javafx_sdk._examples_.LocalizedApplication
+import com.ileveli.javafx_sdk.utils.Logger
 import javafx.application.Application
 
 

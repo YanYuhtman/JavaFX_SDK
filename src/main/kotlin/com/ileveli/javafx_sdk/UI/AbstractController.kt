@@ -1,15 +1,11 @@
 package com.ileveli.javafx_sdk.UI
 
-import com.ileveli.javafx_sdk.utils.CustomCoroutineScope
+import com.ileveli.javafx_sdk.utils.Logger
 import javafx.collections.ObservableList
-import javafx.fxml.Initializable
 import javafx.scene.Parent
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlin.coroutines.CoroutineContext
 
 
 /**

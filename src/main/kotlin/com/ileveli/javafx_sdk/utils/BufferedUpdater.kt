@@ -80,7 +80,7 @@ class BufferedUpdater<T> constructor(
     private fun MutableList<T>.removeFirstOrNullSynced(): T? = synchronized(_buffer){
         _buffer.removeFirstOrNull()
     }
-    public fun add(record:T){
+    fun add(record:T){
         _buffer.addSynced(record)
         if(!_isPoolRunning) {
             scopeProvider().launch {
@@ -90,7 +90,7 @@ class BufferedUpdater<T> constructor(
                     while (!_buffer.isEmpty()) {
                         fpsMonitor.frame()
                         if(enableFpsMonitor)
-                            _bundleSize = fpsMonitor?.nextBundleSize(_bundleSize) ?: _bundleSize
+                            _bundleSize = fpsMonitor.nextBundleSize(_bundleSize)
 //                        if(fpsMonitor != null)
 //                            println("Performance: bundleSize: $_bundleSize instant: ${fpsMonitor.instantFps} fps: ${fpsMonitor.avgFps}")
                         //In case there are many records coming shortly, without buffering UI will freeze
