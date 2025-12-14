@@ -24,6 +24,8 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
     id("maven-publish")
+//    kotlin("kapt")
+    id("com.google.devtools.ksp") version "2.1.20-1.0.31"
 }
 
 group = myGroupId
@@ -75,8 +77,15 @@ publishing {
         mavenLocal()  // publish to ~/.m2/repository
     }
 }
-
+ksp {
+    arg("genClassName", "Strings")
+    arg("debugMode", "true")
+    arg("logLevel", "verbose")
+}
 dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(project(":annotations"))
+    ksp(project(":processor"))
 
     //Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
