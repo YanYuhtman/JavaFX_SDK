@@ -5,9 +5,7 @@ import javafx.fxml.FXML
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
-import java.net.URL
 import java.util.Locale
-import java.util.ResourceBundle
 
 class LocalizationController : AbstractController<LocalizedApplication>() {
     lateinit var localized_button: Button

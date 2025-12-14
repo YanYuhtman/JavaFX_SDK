@@ -1,3 +1,17 @@
+val mainModuleName:String by project
+val mainClassName:String by project
+val mainLauncherClassName:String by project
+
+val myGroupId:String by project
+val myArtifactId:String by project
+val myAppVersion:String by project
+
+val myAppName:String by project
+val myVendor:String by project
+val myCopyright:String by project
+val myAppDescription:String by project
+
+
 plugins {
     val kotlinVersion = "2.1.20"
 
@@ -12,8 +26,8 @@ plugins {
     id("maven-publish")
 }
 
-group = "com.ileveli.javafx_sdk"
-version = "1.0.2"
+group = myGroupId
+version = myAppVersion
 
 repositories {
     mavenCentral()
@@ -27,8 +41,8 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("com.ileveli.javafx_sdk")
-    mainClass.set("com.ileveli.javafx_sdk.HelloApplication")
+    mainModule.set(mainModuleName)
+    mainClass.set(mainClassName)
 }
 kotlin {
     jvmToolchain( 17 )
@@ -36,6 +50,9 @@ kotlin {
 
 plugins.withType<JavaPlugin>().configureEach {
     java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
         modularity.inferModulePath = true
     }
 }
@@ -44,11 +61,18 @@ javafx {
     modules = listOf("javafx.controls", "javafx.fxml")
 }
 
+
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("mavenKotlin") {
             from(components["java"])
+            groupId = myGroupId
+            artifactId = myArtifactId
+            version = project.version.toString()
         }
+    }
+    repositories {
+        mavenLocal()  // publish to ~/.m2/repository
     }
 }
 
