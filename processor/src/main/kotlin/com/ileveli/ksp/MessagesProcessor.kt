@@ -5,11 +5,11 @@ import com.google.devtools.ksp.symbol.*
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Path
-import java.text.ParseException
 import kotlin.io.path.Path
 
 class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor{
     private val _debug = "debug"
+    private val resourceDirPath = "resourceDirPath"
     private val resourcesDirName = "resourcesDirName"
     private val filePrefix = "filePrefix"
     private val fileExtension = "fileExtension"
@@ -20,6 +20,7 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
     val myOptions = mutableMapOf<String,String>(
         _debug to "false",
+        resourceDirPath to "",
         resourcesDirName to "resources",
         filePrefix to "Messages",
         fileExtension to ".properties",
@@ -40,11 +41,11 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
             return emptyList()
 
         environment.logger.warn("Entered MessageProcessor ${resolver.toString()}")
-        resolver.getAllFiles().first().let { sourceFile ->
-            resolveMessageFiles(sourceFile).forEach { sourceFile ->
-                populateMessageTags(sourceFile)
-            }
+
+        resolveMessageFiles(resolveResourceFolder(resolver)).forEach {sourceFile->
+            populateMessageTags(sourceFile)
         }
+
         messageTags = verifyMessageSets(messageTagsByLocale)
         if(messageTags.count() > 0)
             generateSourceCode(environment.codeGenerator)
@@ -52,23 +53,31 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         _callingRound += 1
         return emptyList()
     }
-    private fun resolveMessageFiles(sourceFile: KSFile):List<File>{
-        var filePaths = emptyList<File>()
-        var path: Path? = Path(sourceFile.filePath)
-        do{
-            path = path!!.parent
-            val resourceDir = File(path!!.toFile(),getOption(resourcesDirName))
-            if (resourceDir.exists()) {
-
-                filePaths = resourceDir.walk()
-                    .filter { it.isFile }
-                    .filter { it.name.startsWith(getOption(filePrefix)) }
-                    .filter { it.name.contains(getOption(fileExtension)) }
-                    .toList()
-                break
+    private fun resolveResourceFolder(resolver:Resolver):File{
+        val customResourcePath = File(getOption(resourceDirPath))
+        if(customResourcePath.exists())
+            return customResourcePath
+        var path: Path? = null
+        resolver.getAllFiles().forEach {kSFile ->
+            path = Path(kSFile.filePath)
+            while (path != null) {
+                environment.logger.info("Processing path $path")
+                val resourceDir = File(path.toFile(), getOption(resourcesDirName))
+                if (resourceDir.exists())
+                    return resourceDir
+                path = path.parent
             }
+        }
+        environment.logger.warn("Unable to find 'resources' folder")
+        return File("")
+    }
+    private fun resolveMessageFiles(resourceDir: File):List<File>{
+        var filePaths = resourceDir.walk()
+            .filter { it.isFile }
+            .filter { it.name.startsWith(getOption(filePrefix)) }
+            .filter { it.name.contains(getOption(fileExtension)) }
+            .toList()
 
-        }while (path != null)
         if(filePaths.isEmpty())
             environment.logger.warn("Found 0 file of localized resources!!!")
 
