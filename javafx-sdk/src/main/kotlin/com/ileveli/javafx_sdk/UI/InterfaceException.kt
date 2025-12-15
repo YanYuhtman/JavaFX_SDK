@@ -3,8 +3,9 @@ package com.ileveli.javafx_sdk.UI
 import java.lang.Exception
 
 /**
- * UI.Interface exception wrapper
- * @throws InterfaceException
+ * A custom exception for errors related to the UI framework's internal logic and component lifecycle.
+ * This exception is typically thrown when framework contracts are violated, such as accessing a component
+ * that has not been initialized or is in an invalid state.
  */
 class InterfaceException : Exception {
     constructor() : super()

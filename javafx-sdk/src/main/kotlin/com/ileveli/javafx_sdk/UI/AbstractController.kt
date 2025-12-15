@@ -9,7 +9,18 @@ import kotlinx.coroutines.CoroutineScope
 
 
 /**
- * Abstract Context aware controller
+ * An abstract base class for UI controllers, providing context-awareness and access to the application's
+ * lifecycle and coroutine scopes. It serves as a bridge between the view (defined in FXML or programmatically)
+ * and the application's business logic.
+ *
+ * @param AppContext The type of the [AbstractApplication] providing the application-level context.
+ * @property appContext Provides access to the main application instance.
+ * @property appScope Provides access to the application-level [CoroutineScope].
+ * @property controllerScope A [CoroutineScope] that can be defined for this controller's lifecycle.
+ *   It must be initialized before use.
+ * @property root The root [Parent] node of the view managed by this controller.
+ * @property menuBar The [MenuBar] associated with the controller's view.
+ * @property menus An [ObservableList] of the [Menu]s within the [menuBar].
  */
 abstract class AbstractController<AppContext> :  IAppContextProvider<AppContext>
         where AppContext : AbstractApplication
@@ -38,6 +49,14 @@ abstract class AbstractController<AppContext> :  IAppContextProvider<AppContext>
         get() = menuBar.menus
 
 
+    /**
+     * Internal function to initialize the controller with its context and UI components.
+     * This is typically called by the scene or framework after the view is loaded.
+     *
+     * @param appContext The application context.
+     * @param root The root [Parent] of the view.
+     * @param menuBar The [MenuBar] for the view.
+     */
     internal fun init(appContext: AppContext, root: Parent, menuBar: MenuBar){
         _appContext = appContext
         _root = root
@@ -45,6 +64,14 @@ abstract class AbstractController<AppContext> :  IAppContextProvider<AppContext>
         onContextInitialized(appContext)
         Logger.debug { "Controller initialized"}
     }
+
+    /**
+     * A hook method that is called after the controller has been initialized with the application context.
+     * Subclasses must implement this method to perform their own initialization, such as setting up
+     * event handlers, binding data, or launching initial coroutines.
+     *
+     * @param appContext The fully initialized application context.
+     */
     protected abstract fun onContextInitialized(appContext: AppContext)
 
     //    private val modelsMap = mutableMapOf<KClass<*>,AbstractModel<AppContext, AbstractController<AppContext>>>()

@@ -7,6 +7,19 @@ import java.nio.charset.Charset
 import java.nio.file.Path
 import kotlin.io.path.Path
 
+/**
+ * A KSP (Kotlin Symbol Processing) processor that generates a Kotlin object
+ * containing `const val` declarations for message keys found in localized
+ * `.properties` files.
+ *
+ * This processor helps in centralizing localization keys as compile-time constants,
+ * reducing typos and improving discoverability.
+ *
+ * It supports configuration via KSP options for resource paths, file naming conventions,
+ * and generated code details.
+ *
+ * @param environment The [SymbolProcessorEnvironment] provided by KSP.
+ */
 class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor{
     private val _debug = "debug"
     private val resourceDirPath = "resourceDirPath"
@@ -18,6 +31,7 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     private val genFileName = "genFileName"
     private val genClassName = "genClassName"
 
+    /** Default options for the processor, can be overridden via KSP arguments. */
     val myOptions = mutableMapOf<String,String>(
         _debug to "false",
         resourceDirPath to "",
@@ -36,6 +50,13 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     private var messageTags: Set<String> = emptySet()
 
     private var _callingRound = 0
+
+    /**
+     * The main processing step of the KSP processor.
+     * It discovers message files, extracts keys, verifies consistency, and generates the Kotlin source code.
+     * @param resolver Provides access to the KSP symbol graph.
+     * @return A list of [KSAnnotated] symbols that were not processed (empty in this case).
+     */
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if(_callingRound > 0)
             return emptyList()
@@ -134,7 +155,7 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
 
         val file = codeGenerator.createNewFile(
             Dependencies.ALL_FILES,
-            genPackage,
+            getOption(genPackage),
             getOption(genFileName)
         )
         file.writer().use { writer ->
@@ -149,7 +170,16 @@ object ${getOption(genClassName)} {
         }
     }
 }
+
+/**
+ * Provides an instance of [MessageFilesProcessor] to the KSP build system.
+ */
 class MessagesProcessorProvider : SymbolProcessorProvider {
+    /**
+     * Creates a new [MessageFilesProcessor] instance.
+     * @param environment The [SymbolProcessorEnvironment] provided by KSP.
+     * @return A new [MessageFilesProcessor].
+     */
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         val debug = environment.options["debug"]?.equals("true",true) ?: false
         if(debug) {

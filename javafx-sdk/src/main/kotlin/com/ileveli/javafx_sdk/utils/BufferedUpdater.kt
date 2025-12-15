@@ -11,6 +11,14 @@ import kotlinx.coroutines.yield
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * A data class to monitor Frames Per Second (FPS) and dynamically adjust parameters
+ * like bundle size based on performance.
+ *
+ * @property maxBundleSize The maximum number of items to process in a single bundle.
+ * @property avgFrameRateThreshold The average FPS above which the bundle size can increase.
+ * @property deltaThreshold The amount by which the bundle size increases or decreases.
+ */
 data class FPS_Monitor (
     val maxBundleSize: Int = 200,
     val avgFrameRateThreshold: Int = 30,
@@ -18,10 +26,21 @@ data class FPS_Monitor (
 ) {
 
     private var lastTime: Long? = null
+    /**
+     * The instantaneous frames per second.
+     */
     var instantFps: Long = 0
         private set
+    /**
+     * The smoothed average frames per second.
+     */
     var avgFps: Long = 0
         private set
+
+    /**
+     * Records a frame, updating the instantaneous and average FPS.
+     * Call this method once per frame rendering.
+     */
     fun frame() {
         synchronized(this) {
             if(lastTime == null) {
@@ -36,7 +55,13 @@ data class FPS_Monitor (
 //        println("instantFps  fps: $instantFps, avg $avgFps")
     }
 
-
+    /**
+     * Calculates the next optimal bundle size based on the average FPS.
+     * If FPS is above the threshold, bundle size increases; otherwise, it decreases.
+     *
+     * @param current The current bundle size.
+     * @return The new, adjusted bundle size.
+     */
     fun nextBundleSize(current: Int): Int {
         return if (avgFps > avgFrameRateThreshold)
             min(maxBundleSize, current + deltaThreshold)
@@ -44,6 +69,9 @@ data class FPS_Monitor (
             max(1, current - deltaThreshold)
     }
 
+    /**
+     * Resets the FPS monitor's internal state.
+     */
     fun reset() {
         lastTime = null
         instantFps = 0
@@ -51,15 +79,18 @@ data class FPS_Monitor (
     }
 }
 /**
- * This class buffers input data. It's useful in case a stream to harsh
- * For instance - updating UI
- * @param processRecord - this is a callback that will be triggered according buffered properties
- * @param scope - this is a Coroutine scope (if scope isn't defined at instance creation time @see scopeProvider)
- * @param scopeProvider - the closure getting the scope lazily
- * @param dispatcher - coroutine dispatcher
- * @param delayTime - delay time in millisecond, time for dispatched context give a rest if it <= 0, yield will be used
- * @param bundleSize - records count to process without rest
- * @
+ * A utility class that buffers incoming data and processes it in batches using coroutines.
+ * This is particularly useful for smoothing out UI updates or other operations that
+ * might otherwise cause the application to freeze if processed immediately.
+ *
+ * @param processRecord A callback function that defines how each buffered record should be processed.
+ * @param scope The [CoroutineScope] in which the processing coroutine will be launched. Defaults to [GlobalScope].
+ * @param scopeProvider A lazy provider for the [CoroutineScope], useful if the scope isn't available at instantiation.
+ * @param dispatcher The [CoroutineDispatcher] on which `processRecord` will be executed. Defaults to [Dispatchers.Main].
+ * @param delayTime The time in milliseconds to delay between processing bundles. If `0` or less, `yield()` is used instead of `delay()`.
+ * @param bundleSize The initial number of records to process in a single batch before yielding/delaying.
+ * @param enableFpsMonitor If `true`, an [FPS_Monitor] will be used to dynamically adjust `bundleSize`.
+ * @param fpsMonitor An optional [FPS_Monitor] instance to use if `enableFpsMonitor` is true.
  */
 class BufferedUpdater<T> constructor(
     val processRecord: (record:T)-> Unit,
@@ -80,6 +111,13 @@ class BufferedUpdater<T> constructor(
     private fun MutableList<T>.removeFirstOrNullSynced(): T? = synchronized(_buffer){
         _buffer.removeFirstOrNull()
     }
+
+    /**
+     * Adds a new record to the buffer. If the processing pool is not running, it starts a new coroutine
+     * to process the buffered records in batches.
+     *
+     * @param record The data record to add to the buffer.
+     */
     fun add(record:T){
         _buffer.addSynced(record)
         if(!_isPoolRunning) {
@@ -105,6 +143,10 @@ class BufferedUpdater<T> constructor(
             }
         }
     }
+
+    /**
+     * Clears all records currently in the buffer.
+     */
     fun clear() = synchronized(_buffer){
         _buffer.clear()
     }

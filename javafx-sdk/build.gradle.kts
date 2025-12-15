@@ -77,7 +77,7 @@ publishing {
     }
 }
 ksp {
-    arg("genClassName", "Strings")
+    arg("genClassName", "Messages")
     arg("debug", "true")
     arg("logLevel", "verbose")
 }
