@@ -5,6 +5,7 @@ import com.google.devtools.ksp.symbol.*
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Path
+import java.text.ParseException
 import kotlin.io.path.Path
 
 class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor{
@@ -30,9 +31,10 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     private fun getOption(key: String):String = environment.options[key] ?: myOptions[key]!!
     val debug get() = getOption(_debug).equals("true",true)
     fun getCharSet(locale:String) = (environment.options[locale] ?: myOptions[locale]) ?: getOption(charSet)
-    val messageTags: MutableSet<String> = mutableSetOf()
+    private val messageTagsByLocale = mutableMapOf<String, MutableSet<String>>()
+    private var messageTags: Set<String> = emptySet()
 
-    var _callingRound = 0
+    private var _callingRound = 0
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if(_callingRound > 0)
             return emptyList()
@@ -43,6 +45,7 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
                 populateMessageTags(sourceFile)
             }
         }
+        messageTags = verifyMessageSets(messageTagsByLocale)
         if(messageTags.count() > 0)
             generateSourceCode(environment.codeGenerator)
 
@@ -74,28 +77,50 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     }
     private fun populateMessageTags(file:File){
         var lineCount = 0
-        val charset_locale = listOf(charSet,file.nameWithoutExtension.split('_').let {
-            if(it.size > 1) it.last() else ""
-        }).joinToString ("_").trim('_')
+        val locale = file.nameWithoutExtension.split('_').let {
+            if (it.size > 1) it.last() else ""
+        }
+        val charset_locale = "${charSet}_${locale}".trim('_')
 
         if(debug)
-            environment.logger.warn("Locale charset = $charset_locale for file: ${file.name}")
+            environment.logger.info("Locale charset = $charset_locale for file: ${file.name}")
+
         file.bufferedReader(Charset.forName(getCharSet(charset_locale))).use { reader ->
             reader.lines().forEach{ text ->
                 text.split("=").also {
-                    if(it.count() == 2){
+                    if(it.first().startsWith("#") || it.count() < 2)
+                        environment.logger.info("Skipping line($lineCount): ${text} of file: '${file.name}'")
+                    else{
                         it.first().let { token->
-                            if(!token.isEmpty())
-                                messageTags.add(token.trim())
+                            if(!token.isEmpty()) {
+                                val t = token.trim()
+                                val filePath = file.path
+                                messageTagsByLocale[filePath]?.add(t)
+                                    ?: run {  messageTagsByLocale[filePath] = mutableSetOf(t) }
+                            }
                         }
-                    }else if (debug)
-                        environment.logger.warn("Skipping localization line($lineCount): ${text} of file: ${file.name}")
+                    }
+
                 }
                 lineCount += 1
             }
         }
     }
-
+    private fun verifyMessageSets(messageMap: MutableMap<String, MutableSet<String>>):Set<String>{
+        val joinedSet:Set<String> = messageMap.flatMap {it.value }.toSet()
+        val missingElements = mutableMapOf<String, Set<String>>()
+        messageMap.forEach { (key, value) ->
+            val missingSet = joinedSet - value
+            if(missingSet.count() > 0)
+                missingElements[key] = missingSet
+        }
+        if(!missingElements.isEmpty()){
+            val errorMessage = missingElements.map { entry -> "File: '${entry.key}' is missing resource tags:[${entry.value.joinToString(",")}]" }
+                .joinToString ("\n")
+            environment.logger.error("Some tags missing from text resources locales\n${errorMessage}")
+        }
+        return joinedSet
+    }
     private fun generateSourceCode(codeGenerator: CodeGenerator){
 
         val file = codeGenerator.createNewFile(
@@ -118,8 +143,9 @@ object ${getOption(genClassName)} {
 class MessagesProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         val debug = environment.options["debug"]?.equals("true",true) ?: false
-        if(debug)
-            environment.logger.warn("Entered HelloProcessor")
+        if(debug) {
+            environment.logger.info("Entered HelloProcessor")
+        }
         return MessageFilesProcessor(environment)
     }
 }
