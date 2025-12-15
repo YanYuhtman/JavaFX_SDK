@@ -85,7 +85,7 @@ dependencies {
     //ksp
     implementation(kotlin("stdlib"))
     implementation(project(":annotations"))
-    ksp(project(":processor"))
+    ksp(project(":ksp"))
 
     //Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
