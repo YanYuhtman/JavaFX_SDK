@@ -4,13 +4,13 @@ import com.ileveli.javafx_sdk.UI.AbstractScene
 import com.ileveli.javafx_sdk.UI.iLeveliException
 import com.ileveli.javafx_sdk._examples_.LocalizedApplication
 import com.ileveli.javafx_sdk._examples_.SimpleContextApplication
+import com.ileveli.ksp.Strings
 import javafx.application.Platform
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertThrows
 import java.util.Locale
-import java.util.MissingResourceException
 import kotlin.test.Test
 
 class LocaleTest {
@@ -19,13 +19,13 @@ class LocaleTest {
 
         SimpleContextApplication.show({
             setLocale(Locale("en"),false)
-            Assertions.assertEquals("Hello English", this.getString("locale_hello"),"Default bundle is not loaded")
+            Assertions.assertEquals("Hello English", this.getString(Strings.locale_hello),"Default bundle is not loaded")
             setLocale(Locale("ru"),false)
-            Assertions.assertEquals("Здрасте", this.getString("locale_hello"),"Default bundle is not loaded")
+            Assertions.assertEquals("Здрасте", this.getString(Strings.locale_hello),"Default bundle is not loaded")
             assertThrows<iLeveliException>("setLocale with invalid locale should throw exception", {
                 setLocale(Locale("foo"), false)
             })
-            Assertions.assertEquals("Здрасте", this.getString("locale_hello"),"Default bundle is not loaded")
+            Assertions.assertEquals("Здрасте", this.getString(Strings.locale_hello),"Default bundle is not loaded")
 
             Platform.exit()
         })
