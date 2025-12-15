@@ -4,7 +4,7 @@ A simple, opinionated framework for building modern, context-aware JavaFX applic
 
 ## Features
 
--   **MVVM-like Architecture:** A clear separation of concerns with `AbstractApplication`, `AbstractScene`, `AbstractController`, and `AbstractModel`.
+-   **MVC/MVVM-like Architecture:** A clear separation of concerns with `AbstractApplication`, `AbstractScene`, `AbstractController`, and `AbstractModel`.
 -   **Context-Aware Components:** Easily access application-wide services and state through a shared context.
 -   **Structured Concurrency:** Built-in support for Kotlin Coroutines with lifecycle-aware scopes (`appScope`, `sceneScope`, `modelScope`).
 -   **Localization Support:** A robust localization system (`Localization`) that loads translations from resource bundles.
