@@ -79,7 +79,7 @@ publishing {
 }
 ksp {
     arg("genClassName", "Strings")
-    arg("debugMode", "true")
+    arg("debug", "true")
     arg("logLevel", "verbose")
 }
 dependencies {

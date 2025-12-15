@@ -1,4 +1,4 @@
-package com.ileveli
+package com.ileveli.annotations
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

@@ -3,7 +3,7 @@ plugins {
     kotlin("kapt")
 }
 
-group = "com.ileveli"
+group = "com.ileveli.ksp"
 version = "1.0.0"
 
 repositories {

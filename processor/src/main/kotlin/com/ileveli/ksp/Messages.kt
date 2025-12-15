@@ -1,4 +1,4 @@
-package com.ileveli
+package com.ileveli.ksp
 
 object Messages {
     val ApplicationRef:Any? = null

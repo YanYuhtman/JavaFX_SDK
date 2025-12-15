@@ -1,4 +1,4 @@
-package com.ileveli
+package com.ileveli.ksp
 
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
@@ -8,7 +8,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : SymbolProcessor{
-    private val _debug = "_debug"
+    private val _debug = "debug"
     private val resourcesDirName = "resourcesDirName"
     private val filePrefix = "filePrefix"
     private val fileExtension = "fileExtension"
@@ -23,12 +23,13 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
         filePrefix to "Messages",
         fileExtension to ".properties",
         charSet to Charsets.UTF_8.toString(),
-        genPackage to "com.ileveli",
+        genPackage to "com.ileveli.ksp",
         genFileName to "Messages",
         genClassName to "Messages",
     )
     private fun getOption(key: String):String = environment.options[key] ?: myOptions[key]!!
     val debug get() = getOption(_debug).equals("true",true)
+    fun getCharSet(locale:String) = (environment.options[locale] ?: myOptions[locale]) ?: getOption(charSet)
     val messageTags: MutableSet<String> = mutableSetOf()
 
     var _callingRound = 0
@@ -73,7 +74,13 @@ class MessageFilesProcessor(val environment: SymbolProcessorEnvironment) : Symbo
     }
     private fun populateMessageTags(file:File){
         var lineCount = 0
-        file.bufferedReader(Charset.forName(getOption(charSet))).use { reader ->
+        val charset_locale = listOf(charSet,file.nameWithoutExtension.split('_').let {
+            if(it.size > 1) it.last() else ""
+        }).joinToString ("_").trim('_')
+
+        if(debug)
+            environment.logger.warn("Locale charset = $charset_locale for file: ${file.name}")
+        file.bufferedReader(Charset.forName(getCharSet(charset_locale))).use { reader ->
             reader.lines().forEach{ text ->
                 text.split("=").also {
                     if(it.count() == 2){

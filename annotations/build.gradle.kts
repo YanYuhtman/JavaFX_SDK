@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "2.1.20"
 }
 
-group = "com.ileveli"
+group = "com.ileveli.annotations"
 version = "1.0.0"
 
 repositories {
