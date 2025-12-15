@@ -8,27 +8,44 @@ import kotlinx.coroutines.isActive
 
 
 /**
- * Model state attach detach component status
+ * Represents the lifecycle status of a model as it gets attached to or detached from UI components.
  */
 enum class ModelState{
+    /** The model is not attached to any component. */
     DETACHED,
+    /** The model is fully attached to all required components (e.g., scene and controller). */
     ATTACHED,
+    /** The model has just been attached to a scene. */
     SCENE_ATTACHED,
+    /** The scene the model is attached to has been shown on the stage. */
     SCENE_SHOWN,
+    /** The scene has been detached from the model. */
     SCENE_DETACHED,
+    /** The model has just been attached to a controller. */
     CONTROLLER_ATTACHED,
+    /** The controller has been detached from the model. */
     CONTROLLER_DETACHED,
 }
 
 /**
- * Model interface
+ * A marker interface for all model classes in the framework.
  */
 interface IModel{
 
 }
 
 /**
- * Basic Scene model, without FXML support
+ * An abstract base class for models that are tied to the lifecycle of a scene, but not necessarily an FXML controller.
+ * It provides context-awareness, coroutine scopes, and lifecycle callbacks.
+ *
+ * @param AppContext The type of the [AbstractApplication].
+ * @param Scene The type of the [AbstractScene] this model can attach to.
+ * @property isModelAttached A boolean flag indicating if the model is fully attached and ready.
+ * @property modelState The current [ModelState] of the model.
+ * @property appContext Provides access to the main application instance.
+ * @property appScope Provides access to the application-level [CoroutineScope].
+ * @property modelScope A [CoroutineScope] tied to this model's lifecycle, created when attached to a scene and cancelled when detached.
+ * @property scene The [AbstractScene] this model is currently attached to.
  */
 abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvider<AppContext>, ISceneProvider<AppContext, AbstractScene<AppContext>>
     where AppContext : AbstractApplication, Scene : AbstractScene<AppContext> {
@@ -69,13 +86,17 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
 
     internal var _scene:Scene? = null
     /**
-     * @return The attached scene
-     * @throws InterfaceException in case attached component not available
+     * @return The attached scene.
+     * @throws InterfaceException if no scene is attached.
      * @see ModelState
      */
     override val scene: AbstractScene<AppContext>
         get() = _scene?.let { return it } ?: throw InterfaceException("The scene is not attached!")
 
+    /**
+     * Attaches the model to a scene, initializing the application context and model-specific coroutine scope.
+     * @param scene The scene to attach to.
+     */
     internal fun attachScene(scene: Scene){
         _scene = scene
         _appContext = scene.appContext
@@ -90,6 +111,9 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
         Logger.debug { "Scene ${scene::class} attached to the the model\n${this@AbstractSceneModel::class}" }
     }
 
+    /**
+     * Detaches the model from the scene, cancelling the model's coroutine scope and clearing references.
+     */
     internal fun detachScene(){
         Logger.debug { "Scene ${scene::class} detaching from the the model\n${this@AbstractSceneModel::class}" }
         modelScope.cancel()
@@ -110,37 +134,35 @@ abstract class AbstractSceneModel<AppContext, Scene> : IModel, IAppContextProvid
     }
 
     /**
-     * Called on model state changed
-     * @param state current model state
-     * @see ModelState
+     * A general hook called whenever the model's state changes.
+     * @param state The current [ModelState].
      */
     open fun OnModelStateChanged(state: ModelState){}
 
     /**
-     * Called when model finally attached. In this state all component references are available
+     * Called when the model is fully attached and all component references are available.
+     * This is the primary entry point for a model's logic.
      */
     abstract fun OnAttached()
 
     /**
-     * Called later when scene is in show state
+     * Called after the attached scene has been rendered and shown on the stage.
      */
     abstract fun OnSceneShown()
     /**
-     * Called when model detached from all components
+     * Called when the model is fully detached from all components. Use this for cleanup.
      */
     abstract fun OnDetached()
 
 }
 /**
- * Model attached to FXML controller
- * @param AppContext Application context
- * @see AbstractApplication
+ * An abstract model designed to be attached to both a scene and an FXML controller.
+ * It extends [AbstractSceneModel] to include controller-specific lifecycle management.
  *
- * @param Scene Attached scene
- * @see AbstractScene
- *
- * @param Controller Attached controller
- * @see AbstractController
+ * @param AppContext The type of the [AbstractApplication].
+ * @param Scene The type of the [AbstractScene].
+ * @param Controller The type of the [AbstractController].
+ * @property controller The [AbstractController] this model is currently attached to.
  */
 abstract class AbstractControllerModel<AppContext, Scene, Controller> : AbstractSceneModel<AppContext, Scene>()
         where AppContext : AbstractApplication,
@@ -171,13 +193,17 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
     internal var _controller:Controller? = null
 
     /**
-     * @return The attached controller
-     * @throws InterfaceException in case attached component not available
+     * @return The attached controller.
+     * @throws InterfaceException if no controller is attached.
      * @see ModelState
      */
     val controller:Controller
         get() = _controller?.let { return it } ?: throw InterfaceException("The controller is not attached!")
 
+    /**
+     * Attaches the model to a controller, creating a coroutine scope for the controller.
+     * @param controller The controller to attach to.
+     */
     internal fun attachController(controller:Controller){
         _controller = controller
         if(controller._controllerScope == null || !controller.controllerScope.isActive)
@@ -187,6 +213,9 @@ abstract class AbstractControllerModel<AppContext, Scene, Controller> : Abstract
         Logger.debug { "Controller ${controller::class} attached to the the model ${this@AbstractControllerModel::class}" }
     }
 
+    /**
+     * Detaches the model from the controller, cancelling the controller's scope and clearing references.
+     */
     internal fun detachController(){
         Logger.debug { "Controller ${controller::class} detaching from the the model ${this@AbstractControllerModel::class}" }
         _controller?.controllerScope?.cancel()
