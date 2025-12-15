@@ -24,7 +24,6 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "2.25.0"
     id("maven-publish")
-//    kotlin("kapt")
     id("com.google.devtools.ksp") version "2.1.20-1.0.31"
 }
 
@@ -83,6 +82,7 @@ ksp {
     arg("logLevel", "verbose")
 }
 dependencies {
+    //ksp
     implementation(kotlin("stdlib"))
     implementation(project(":annotations"))
     ksp(project(":processor"))

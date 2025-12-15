@@ -1,10 +1,11 @@
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("kapt")
+    id("maven-publish")
 }
 
-group = "com.ileveli.ksp"
-version = "1.0.0"
+group = "com.ileveli"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -27,4 +28,17 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(17)
+}
+publishing {
+    publications {
+        create<MavenPublication>("mavenKotlin") {
+            from(components["java"])
+            groupId = group.toString()
+            artifactId = "ksp"
+            version = project.version.toString()
+        }
+    }
+    repositories {
+        mavenLocal()  // publish to ~/.m2/repository
+    }
 }
