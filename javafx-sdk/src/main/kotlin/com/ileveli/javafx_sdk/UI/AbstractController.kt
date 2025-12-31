@@ -52,12 +52,15 @@ abstract class AbstractController<AppContext> :  IAppContextProvider<AppContext>
     /**
      * Internal function to initialize the controller with its context and UI components.
      * This is typically called by the scene or framework after the view is loaded.
+     * In case this is an **INTERNAL CONTROLLER** (the controller defined inside other controller with @FXML fooController property)
+     *          - This function must be called first thing **onContextInitialized** body of the main controller
+     *
      *
      * @param appContext The application context.
      * @param root The root [Parent] of the view.
      * @param menuBar The [MenuBar] for the view.
      */
-    internal fun init(appContext: AppContext, root: Parent, menuBar: MenuBar){
+    fun init(appContext: AppContext, root: Parent, menuBar: MenuBar){
         _appContext = appContext
         _root = root
         _menuBar = menuBar
